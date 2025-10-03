@@ -4,6 +4,7 @@ from flask_cors import CORS
 from flask_bcrypt import Bcrypt
 from flask_migrate import Migrate
 from dotenv import load_dotenv
+from app.config import Config
 import os
 
 db = SQLAlchemy()
@@ -18,6 +19,8 @@ def create_app():
     app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'sqlite:///database.db')
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'your-secret-key-here')
+    app.config.from_object(Config)
+    Config.init_upload_dirs(app)
     
     # Extensions
     db.init_app(app)

@@ -12,6 +12,9 @@ flask-migrate = "*"
 python-dotenv = "*"
 pyjwt = "*"
 flask-mail = "*"
+pandas = "*"
+openpyxl = "*"
+xlrd = "*"
 
 [dev-packages]
 

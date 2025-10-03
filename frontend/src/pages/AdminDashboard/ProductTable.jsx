@@ -1,10 +1,10 @@
 import React from 'react';
 import { flexRender } from '@tanstack/react-table';
-import { FiPackage } from 'react-icons/fi';
+import { FiPackage, FiImage } from 'react-icons/fi';
 
 const ProductTable = ({ table, onEdit, onDelete }) => {
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+    <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden font">
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead className="bg-gray-50 border-b border-gray-200">

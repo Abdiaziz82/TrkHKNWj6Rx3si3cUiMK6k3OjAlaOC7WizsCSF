@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useReactTable, getCoreRowModel, getFilteredRowModel, getSortedRowModel, getPaginationRowModel, flexRender } from '@tanstack/react-table';
-import { FiEdit, FiTrash2, FiPlus, FiUpload, FiDownload, FiCheckCircle, FiXCircle, FiAlertCircle, FiPackage } from 'react-icons/fi';
+import { FiEdit, FiTrash2, FiPlus, FiUpload, FiDownload, FiCheckCircle, FiXCircle, FiAlertCircle, FiPackage , FiImage } from 'react-icons/fi';
 
 // Import exactly 3 components
 import HeaderSection from './HeaderSection';
@@ -63,51 +63,57 @@ const InventoryManagement = () => {
     }
   };
 
-  const createProduct = async (productData) => {
-    try {
-      const response = await fetch(API_BASE_URL, {
-        method: 'POST',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(productData),
-      });
+// Update the createProduct and updateProduct functions:
 
-      if (!response.ok) {
-        throw new Error(`Failed to create product: ${response.status}`);
-      }
+const createProduct = async (formData) => {
+  try {
+    console.log('Creating product with data:', formData);
+    
+    const response = await fetch(API_BASE_URL, {
+      method: 'POST',
+      credentials: 'include',
+      // NO Content-Type header - browser sets it automatically for FormData
+      body: formData,
+    });
 
-      const result = await response.json();
-      return result;
-    } catch (error) {
-      console.error('Error creating product:', error);
-      throw error;
+    const result = await response.json();
+    console.log('Create product response:', result);
+    
+    if (!response.ok) {
+      throw new Error(result.message || `Failed to create product: ${response.status}`);
     }
-  };
 
-  const updateProduct = async (id, productData) => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/${id}`, {
-        method: 'PUT',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(productData),
-      });
+    return result;
+  } catch (error) {
+    console.error('Error creating product:', error);
+    throw error;
+  }
+};
 
-      if (!response.ok) {
-        throw new Error(`Failed to update product: ${response.status}`);
-      }
+const updateProduct = async (id, formData) => {
+  try {
+    console.log('Updating product:', id, 'with data:', formData);
+    
+    const response = await fetch(`${API_BASE_URL}/${id}`, {
+      method: 'PUT',
+      credentials: 'include',
+      // NO Content-Type header - browser sets it automatically for FormData
+      body: formData,
+    });
 
-      const result = await response.json();
-      return result;
-    } catch (error) {
-      console.error('Error updating product:', error);
-      throw error;
+    const result = await response.json();
+    console.log('Update product response:', result);
+    
+    if (!response.ok) {
+      throw new Error(result.message || `Failed to update product: ${response.status}`);
     }
-  };
+
+    return result;
+  } catch (error) {
+    console.error('Error updating product:', error);
+    throw error;
+  }
+};
 
   const deleteProduct = async (id) => {
     try {
@@ -141,32 +147,48 @@ const InventoryManagement = () => {
   ];
 
   // CRUD Operations
-  const handleAdd = async () => {
-    if (!newItem.name || !newItem.sku) {
-      alert('Product name and SKU are required');
-      return;
+ const handleAdd = async (formData) => {
+  try {
+    setIsLoading(true);
+    const result = await createProduct(formData);
+    
+    if (result.success) {
+      await fetchProducts();
+      resetForm();
+      setIsAddModalOpen(false);
+      alert('Product added successfully!');
+    } else {
+      throw new Error(result.message || 'Failed to add product');
     }
+  } catch (error) {
+    console.error('Error adding product:', error);
+    alert('Error adding product: ' + error.message);
+  } finally {
+    setIsLoading(false);
+  }
+};
 
-    try {
-      setIsLoading(true);
-      const result = await createProduct(newItem);
-      
-      if (result.success) {
-        await fetchProducts();
-        resetForm();
-        setIsAddModalOpen(false);
-        alert('Product added successfully!');
-      } else {
-        throw new Error(result.message || 'Failed to add product');
-      }
-    } catch (error) {
-      console.error('Error adding product:', error);
-      alert('Error adding product: ' + error.message);
-    } finally {
-      setIsLoading(false);
+const handleUpdate = async (formData) => {
+  try {
+    setIsLoading(true);
+    const result = await updateProduct(editingItem.id, formData);
+    
+    if (result.success) {
+      await fetchProducts();
+      setEditingItem(null);
+      resetForm();
+      setIsAddModalOpen(false);
+      alert('Product updated successfully!');
+    } else {
+      throw new Error(result.message || 'Failed to update product');
     }
-  };
-
+  } catch (error) {
+    console.error('Error updating product:', error);
+    alert('Error updating product: ' + error.message);
+  } finally {
+    setIsLoading(false);
+  }
+};
   const handleEdit = (item) => {
     setEditingItem(item);
     setNewItem({
@@ -179,32 +201,7 @@ const InventoryManagement = () => {
     setIsAddModalOpen(true);
   };
 
-  const handleUpdate = async () => {
-    if (!newItem.name || !newItem.sku) {
-      alert('Product name and SKU are required');
-      return;
-    }
 
-    try {
-      setIsLoading(true);
-      const result = await updateProduct(editingItem.id, newItem);
-      
-      if (result.success) {
-        await fetchProducts();
-        setEditingItem(null);
-        resetForm();
-        setIsAddModalOpen(false);
-        alert('Product updated successfully!');
-      } else {
-        throw new Error(result.message || 'Failed to update product');
-      }
-    } catch (error) {
-      console.error('Error updating product:', error);
-      alert('Error updating product: ' + error.message);
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const handleDelete = async (id) => {
     if (!window.confirm('Are you sure you want to delete this product?')) {
@@ -243,53 +240,165 @@ const InventoryManagement = () => {
     });
   };
 
-  const handleBulkUpload = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      console.log('Processing bulk upload:', file.name);
-      alert(`Processing bulk upload: ${file.name}`);
-    }
-  };
+const handleBulkUpload = async (event) => {
+  const file = event.target.files[0];
+  if (!file) return;
 
-  const downloadTemplate = () => {
-    const headers = ['name', 'sku', 'description', 'unit', 'price', 'stock', 'threshold', 'expiry_date', 'status'];
-    const sampleData = ['Sugar 50kg', 'SUG50', 'Premium quality sugar', 'kg', '45.99', '150', '20', '2024-12-31', 'active'];
-    const csvContent = [headers.join(','), sampleData.join(',')].join('\n');
+  // Check file type
+  const allowedTypes = ['.csv', '.xlsx', '.xls'];
+  const fileExtension = '.' + file.name.split('.').pop().toLowerCase();
+  
+  if (!allowedTypes.includes(fileExtension)) {
+    alert('Please upload a CSV or Excel file (.csv, .xlsx, .xls)');
+    return;
+  }
+
+  try {
+    setIsLoading(true);
     
-    const blob = new Blob([csvContent], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'inventory_template.csv';
-    link.click();
-  };
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const response = await fetch(`${API_BASE_URL}/bulk-upload`, {
+      method: 'POST',
+      credentials: 'include',
+      body: formData,
+    });
+
+    const result = await response.json();
+
+    if (result.success) {
+      alert(`Bulk upload completed!\nSuccess: ${result.success_count}\nErrors: ${result.error_count}`);
+      
+      // Show detailed errors if any
+      if (result.errors && result.errors.length > 0) {
+        console.error('Upload errors:', result.errors);
+        if (result.errors.length > 0) {
+          alert(`Some products failed to upload:\n${result.errors.slice(0, 5).join('\n')}${result.errors.length > 5 ? '\n...and more' : ''}`);
+        }
+      }
+      
+      // Refresh the product list
+      await fetchProducts();
+    } else {
+      throw new Error(result.message || 'Bulk upload failed');
+    }
+  } catch (error) {
+    console.error('Error during bulk upload:', error);
+    alert('Error during bulk upload: ' + error.message);
+  } finally {
+    setIsLoading(false);
+    // Reset file input
+    event.target.value = '';
+  }
+};
+
+const downloadTemplate = () => {
+  // Create sample data for Excel template (without status field)
+  const sampleData = [
+    {
+      name: 'Sugar 50kg',
+      sku: 'SUG50',
+      description: 'Premium quality sugar',
+      unit: 'kg',
+      price: 45.99,
+      stock: 150,
+      threshold: 20,
+      expiry_date: '2024-12-31'
+    },
+    {
+      name: 'Rice 25kg',
+      sku: 'RIC25',
+      description: 'Basmati rice',
+      unit: 'kg',
+      price: 89.99,
+      stock: 75,
+      threshold: 25,
+      expiry_date: '2024-10-15'
+    },
+    {
+      name: 'Flour 10kg',
+      sku: 'FLR10',
+      description: 'All-purpose flour',
+      unit: 'kg',
+      price: 25.50,
+      stock: 0,
+      threshold: 10,
+      expiry_date: '2024-08-20'
+    }
+  ];
+
+  // Convert to CSV for download (remove status from headers)
+  const headers = ['name', 'sku', 'description', 'unit', 'price', 'stock', 'threshold', 'expiry_date'];
+  const csvContent = [
+    headers.join(','),
+    ...sampleData.map(row => 
+      headers.map(header => {
+        const value = row[header];
+        // Handle values that might contain commas
+        return typeof value === 'string' && value.includes(',') ? `"${value}"` : value;
+      }).join(',')
+    )
+  ].join('\n');
+  
+  const blob = new Blob([csvContent], { type: 'text/csv' });
+  const url = window.URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = 'inventory_bulk_upload_template.csv';
+  link.click();
+  window.URL.revokeObjectURL(url);
+};
 
   // Column definitions with index column
-  const columns = useMemo(() => [
-    {
-      id: 'index',
-      header: '#',
-      cell: ({ row }) => (
-        <span className="text-sm text-gray-500 font-medium">
-          {row.index + 1}
-        </span>
-      ),
-      size: 60,
+ const columns = useMemo(() => [
+  {
+    id: 'index',
+    header: '#',
+    cell: ({ row }) => (
+      <span className="text-sm text-gray-500 font-medium">
+        {row.index + 1}
+      </span>
+    ),
+    size: 60,
+  },
+  {
+    accessorKey: 'image_url',
+    header: 'Image',
+    cell: info => {
+      const imageUrl = info.getValue();
+      return (
+        <div className="flex items-center justify-center">
+          {imageUrl ? (
+            <img 
+              src={`http://localhost:5000${imageUrl}`} 
+              alt="Product" 
+              className="w-10 h-10 object-cover rounded-lg"
+            />
+          ) : (
+            <div className="w-10 h-10 bg-gray-200 rounded-lg flex items-center justify-center">
+              <FiImage className="text-gray-400" size={16} />
+            </div>
+          )}
+        </div>
+      );
     },
-    {
-      accessorKey: 'name',
-      header: 'Product Name',
-      cell: info => info.getValue(),
-    },
-    {
-      accessorKey: 'sku',
-      header: 'SKU',
-      cell: info => (
-        <span className="font-mono text-sm bg-gray-100 px-2 py-1 rounded">
-          {info.getValue()}
-        </span>
-      ),
-    },
+    size: 80,
+  },
+  {
+    accessorKey: 'name',
+    header: 'Product Name',
+    cell: info => info.getValue(),
+  },
+  {
+    accessorKey: 'sku',
+    header: 'SKU',
+    cell: info => (
+      <span className="font-mono text-sm bg-gray-100 px-2 py-1 rounded">
+        {info.getValue()}
+      </span>
+    ),
+  },
     {
       accessorKey: 'description',
       header: 'Description',
@@ -304,29 +413,41 @@ const InventoryManagement = () => {
         </span>
       ),
     },
-    {
-      accessorKey: 'status',
-      header: 'Status',
-      cell: info => {
-        const status = info.getValue();
-        const statusConfig = statusOptions.find(s => s.value === status);
-        const Icon = statusConfig?.icon || FiAlertCircle;
-        const colorClass = {
-          active: 'bg-green-100 text-green-800',
-          inactive: 'bg-gray-100 text-gray-800',
-          low_stock: 'bg-orange-100 text-orange-800',
-          out_of_stock: 'bg-red-100 text-red-800',
-          discontinued: 'bg-gray-100 text-gray-800'
-        }[status] || 'bg-gray-100 text-gray-800';
+{
+  accessorKey: 'status',
+  header: 'Status',
+  cell: info => {
+    const stock = Number(info.row.original.stock);
+    const threshold = Number(info.row.original.threshold);
+    
+    let status = 'active';
+    let statusConfig = statusOptions.find(s => s.value === 'active');
+    
+    if (stock === 0) {
+      status = 'out_of_stock';
+      statusConfig = statusOptions.find(s => s.value === 'out_of_stock');
+    } else if (stock <= threshold) {
+      status = 'low_stock';
+      statusConfig = statusOptions.find(s => s.value === 'low_stock');
+    }
+    
+    const Icon = statusConfig?.icon || FiAlertCircle;
+    const colorClass = {
+      active: 'bg-green-100 text-green-800',
+      inactive: 'bg-gray-100 text-gray-800',
+      low_stock: 'bg-orange-100 text-orange-800',
+      out_of_stock: 'bg-red-100 text-red-800',
+      discontinued: 'bg-gray-100 text-gray-800'
+    }[status] || 'bg-gray-100 text-gray-800';
 
-        return (
-          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${colorClass}`}>
-            <Icon className="w-3 h-3 mr-1" />
-            {statusConfig?.label || status}
-          </span>
-        );
-      },
-    },
+    return (
+      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${colorClass}`}>
+        <Icon className="w-3 h-3 mr-1" />
+        {statusConfig?.label || status}
+      </span>
+    );
+  },
+},
     {
       accessorKey: 'price',
       header: 'Price',
@@ -453,15 +574,15 @@ const InventoryManagement = () => {
       )}
 
       <AddEditModal
-        isOpen={isAddModalOpen}
-        onClose={() => setIsAddModalOpen(false)}
-        editingItem={editingItem}
-        newItem={newItem}
-        setNewItem={setNewItem}
-        onSave={editingItem ? handleUpdate : handleAdd}
-        isLoading={isLoading}
-        statusOptions={statusOptions}
-      />
+  isOpen={isAddModalOpen}
+  onClose={() => setIsAddModalOpen(false)}
+  editingItem={editingItem}
+  newItem={newItem}
+  setNewItem={setNewItem}
+  onSave={editingItem ? handleUpdate : handleAdd}
+  isLoading={isLoading}
+  statusOptions={statusOptions}
+/>
     </div>
   );
 };

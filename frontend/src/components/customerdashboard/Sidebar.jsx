@@ -52,6 +52,12 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
       label: 'Dashboard Overview',
       description: 'System metrics & KPIs'
     },
+    //  { 
+    //   path: '/customer-dashboard/products', 
+    //   icon: RiDashboardLine, 
+    //   label: 'Products',
+    //   description: 'System metrics & KPIs'
+    // },
     
     { 
       path: '/customer-dashboard/orders', 
