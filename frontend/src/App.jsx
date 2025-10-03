@@ -11,10 +11,10 @@ import DashboardHome from "./pages/customerdashboard/DashboardHome";
 import Orders from "./pages/customerdashboard/Orders";
 import Products from "./pages/customerdashboard/Products";
 import Profile from "./pages/customerdashboard/Profile";
+import InventoryManagement from "./pages/AdminDashboard/InventoryManagement";
 import AdminProtectedRoute from "./components/AdminDashboard/AdminProtectedRoute";
 import AdminLayout from "./components/AdminDashboard/AdminLayout";
 import AdminDashboardHome from "./pages/AdminDashboard/AdminDashboardHome";
-import UserManagement from "./pages/AdminDashboard/UserManagement";
 import AdminProfile from "./pages/AdminDashboard/AdminProfile";
 import OrdersManagement from "./pages/AdminDashboard/OrdersManagement";
 import LedgerPayments from "./pages/AdminDashboard/LedgerPayments";
@@ -26,6 +26,8 @@ import Settings from "./pages/AdminDashboard/Settings";
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(null);
   const [loading, setLoading] = useState(true);
+
+
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -52,6 +54,8 @@ function App() {
     checkAuth();
   }, []);
 
+ 
+
   // Show loading spinner while checking authentication
   if (loading) {
     return (
@@ -63,6 +67,7 @@ function App() {
       </div>
     );
   }
+
 
   return (
     <>
@@ -94,10 +99,16 @@ function App() {
         <Route path="/admin-dashboard" element={
           <AdminProtectedRoute>
             <AdminLayout />
+
+           
           </AdminProtectedRoute>
+          
         }>
-         <Route index element={<AdminDashboardHome />} />
-          <Route path="inventory-management" element={<UserManagement />} />
+
+         
+          <Route index element={<AdminDashboardHome />} />
+          <Route path="inventory-management" element={<InventoryManagement />} />
+
           <Route path="products" element={<div>Admin Products Page</div>} />
           <Route path="orders-management" element={<OrdersManagement />} />
            <Route path="ledger-payments" element={<LedgerPayments />} />
