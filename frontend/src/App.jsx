@@ -16,6 +16,12 @@ import AdminProtectedRoute from "./components/AdminDashboard/AdminProtectedRoute
 import AdminLayout from "./components/AdminDashboard/AdminLayout";
 import AdminDashboardHome from "./pages/AdminDashboard/AdminDashboardHome";
 import AdminProfile from "./pages/AdminDashboard/AdminProfile";
+import OrdersManagement from "./pages/AdminDashboard/OrdersManagement";
+import LedgerPayments from "./pages/AdminDashboard/LedgerPayments";
+import RetailerProfiles from "./pages/AdminDashboard/RetailerProfiles";
+import AnalyticsForecasting from "./pages/AdminDashboard/AnalyticsForecasting";
+import DigitalMarketingTools from "./pages/AdminDashboard/DigitalMarketingTools";
+import Settings from "./pages/AdminDashboard/Settings";
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(null);
@@ -98,15 +104,19 @@ function App() {
           </AdminProtectedRoute>
           
         }>
+
          
           <Route index element={<AdminDashboardHome />} />
           <Route path="inventory-management" element={<InventoryManagement />} />
+
           <Route path="products" element={<div>Admin Products Page</div>} />
-          <Route path="orders-management" element={<div>Admin Orders Page</div>} />
-          <Route path="analytics" element={<div>Admin Analytics Page</div>} />
-          <Route path="finance" element={<div>Finance Page</div>} />
+          <Route path="orders-management" element={<OrdersManagement />} />
+           <Route path="ledger-payments" element={<LedgerPayments />} />
+           <Route path="retailer-profiles" element={<RetailerProfiles />} />
+          <Route path="analytics-forecasting" element={<AnalyticsForecasting />} />
+          <Route path="digital-marketing-tools" element={<DigitalMarketingTools />} />
           <Route path="profile" element={<AdminProfile />} />
-          <Route path="settings" element={<div>System Settings Page</div>} />
+          <Route path="settings" element={<Settings />} />
           <Route path="help" element={<div>Admin Help Page</div>} />
         </Route>
       </Routes>
