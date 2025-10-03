@@ -84,7 +84,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
       description: 'Account management'
     },
     { 
-      path: '/customer-dashboard/settings', 
+      path: '/customer-dashboard/customersettings', 
       icon: RiSettings3Line, 
       label: 'Settings',
       description: 'System configuration'
