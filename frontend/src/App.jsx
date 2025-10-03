@@ -11,11 +11,10 @@ import DashboardHome from "./pages/customerdashboard/DashboardHome";
 import Orders from "./pages/customerdashboard/Orders";
 import Products from "./pages/customerdashboard/Products";
 import Profile from "./pages/customerdashboard/Profile";
-import InventoryManagement from "./components/AdminDashboard/InventoryManagement";
+import InventoryManagement from "./pages/AdminDashboard/InventoryManagement";
 import AdminProtectedRoute from "./components/AdminDashboard/AdminProtectedRoute";
 import AdminLayout from "./components/AdminDashboard/AdminLayout";
 import AdminDashboardHome from "./pages/AdminDashboard/AdminDashboardHome";
-import UserManagement from "./pages/AdminDashboard/UserManagement";
 import AdminProfile from "./pages/AdminDashboard/AdminProfile";
 
 function App() {
@@ -99,9 +98,9 @@ function App() {
           </AdminProtectedRoute>
           
         }>
-          <Route path="/admin-dashboard/inventory-management" element={<InventoryManagement />} />
+         
           <Route index element={<AdminDashboardHome />} />
-          <Route path="inventory-management" element={<UserManagement />} />
+          <Route path="inventory-management" element={<InventoryManagement />} />
           <Route path="products" element={<div>Admin Products Page</div>} />
           <Route path="orders-management" element={<div>Admin Orders Page</div>} />
           <Route path="analytics" element={<div>Admin Analytics Page</div>} />
