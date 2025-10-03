@@ -1,13 +1,15 @@
-// components/Chatbot.js
 import React, { useState, useRef, useEffect } from 'react';
 import { FiSend, FiX, FiMinimize, FiMaximize, FiPaperclip, FiUser, FiClock } from 'react-icons/fi';
 import { BsLightningFill } from 'react-icons/bs';
+import { useTranslation } from 'react-i18next';
 
 const Chatbot = ({ isOpen, onClose }) => {
+  const { t } = useTranslation();
+
   const [messages, setMessages] = useState([
     {
       id: 1,
-      text: "Hello! I'm your wholesale commerce assistant. I can help you with inventory inquiries, order tracking, pricing information, and supplier connections. How can I assist your business today?",
+      text: t("chatbot.welcome"),
       sender: 'bot',
       timestamp: new Date(),
       type: 'welcome'
@@ -82,10 +84,10 @@ const Chatbot = ({ isOpen, onClose }) => {
   };
 
   const quickActions = [
-    { label: 'Check Inventory', query: 'What is the current inventory status for popular items?' },
-    { label: 'Get Pricing', query: 'Can you provide wholesale pricing for bulk orders?' },
-    { label: 'Track Order', query: 'I need to track my recent order' },
-    { label: 'Supplier Info', query: 'Connect me with reliable suppliers' }
+    { label: t("chatbot.quickActions.inventory"), query: 'What is the current inventory status for popular items?' },
+    { label: t("chatbot.quickActions.pricing"), query: 'Can you provide wholesale pricing for bulk orders?' },
+    { label: t("chatbot.quickActions.order"), query: 'I need to track my recent order' },
+    { label: t("chatbot.quickActions.supplier"), query: 'Connect me with reliable suppliers' }
   ];
 
   const handleQuickAction = (query) => {
@@ -104,10 +106,10 @@ const Chatbot = ({ isOpen, onClose }) => {
             <BsLightningFill className="w-5 h-5 text-white" />
           </div>
           <div>
-            <h3 className="text-lg font-semibold text-slate-900">Commerce Assistant</h3>
+            <h3 className="text-lg font-semibold text-slate-900">{t("chatbot.header.title")}</h3>
             <div className="flex items-center space-x-1">
               <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-              <span className="text-sm text-slate-500">Online</span>
+              <span className="text-sm text-slate-500">{t("chatbot.header.status")}</span>
             </div>
           </div>
         </div>
@@ -187,7 +189,7 @@ const Chatbot = ({ isOpen, onClose }) => {
                       <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
                       <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
                     </div>
-                    <span className="text-sm text-slate-500">Processing your inquiry...</span>
+                    <span className="text-sm text-slate-500">{t("chatbot.loading")}</span>
                   </div>
                 </div>
               </div>
@@ -222,7 +224,7 @@ const Chatbot = ({ isOpen, onClose }) => {
                   type="text"
                   value={inputMessage}
                   onChange={(e) => setInputMessage(e.target.value)}
-                  placeholder="Type your business inquiry..."
+                  placeholder={t("chatbot.inputPlaceholder")}
                   className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm text-slate-700 placeholder-slate-400 disabled:bg-slate-50"
                   disabled={isLoading}
                 />
@@ -247,7 +249,7 @@ const Chatbot = ({ isOpen, onClose }) => {
             {/* Privacy Notice */}
             <div className="mt-3 text-center">
               <p className="text-xs text-slate-400">
-                Secure AI assistant • Enterprise-grade encryption
+                {t("chatbot.privacy")}
               </p>
             </div>
           </div>
