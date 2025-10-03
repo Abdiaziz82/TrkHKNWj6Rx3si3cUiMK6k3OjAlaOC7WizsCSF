@@ -52,12 +52,12 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
       label: 'Dashboard Overview',
       description: 'System metrics & KPIs'
     },
-    //  { 
-    //   path: '/customer-dashboard/products', 
-    //   icon: RiDashboardLine, 
-    //   label: 'Products',
-    //   description: 'System metrics & KPIs'
-    // },
+     { 
+      path: '/customer-dashboard/products', 
+      icon: RiBarChartLine, 
+      label: 'Products',
+      description: 'System metrics & KPIs'
+    },
     
     { 
       path: '/customer-dashboard/orders', 
@@ -65,24 +65,14 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
       label: 'Orders',
       description: 'Order processing'
     },
-    { 
-      path: '/customer-dashboard/payments', 
-      icon: RiWallet3Line, 
-      label: 'Payments',
-      description: 'Transaction history'
-    },
+  
     { 
       path: '/customer-dashboard/messages', 
       icon: RiMessage2Line, 
       label: 'Messages',
       description: 'Communication hub'
     },
-    { 
-      path: '/customer-dashboard/analytics', 
-      icon: RiBarChartLine, 
-      label: 'Analytics',
-      description: 'Business intelligence'
-    },
+   
     { 
       path: '/customer-dashboard/profile', 
       icon: RiUserLine, 
