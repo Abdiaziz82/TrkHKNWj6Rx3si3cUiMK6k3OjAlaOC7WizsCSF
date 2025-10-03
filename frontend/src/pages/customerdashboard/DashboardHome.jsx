@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   FiShoppingCart, 
   FiPackage, 
@@ -11,7 +11,9 @@ import {
   FiTrendingUp,
   FiBox,
   FiMapPin,
-  FiCalendar
+  FiCalendar,
+  FiX,
+  FiAlertCircle
 } from 'react-icons/fi';
 import {
   BarChart,
@@ -28,6 +30,81 @@ import {
 
 const DashboardHome = () => {
   const [searchQuery, setSearchQuery] = useState('');
+  const [showNewProductOffer, setShowNewProductOffer] = useState(false);
+  const [currentOfferProduct, setCurrentOfferProduct] = useState(null);
+
+  // New Products with Limited Time Offers
+  const [newProductsWithOffers, setNewProductsWithOffers] = useState([
+    {
+      id: 1001,
+      name: 'Organic Quinoa 20kg',
+      category: 'Grains & Superfoods',
+      price: '$129.99',
+      originalPrice: '$159.99',
+      discount: '18% OFF',
+      rating: 4.9,
+      delivery: 'Next day delivery',
+      image: '🌾',
+      isNew: true,
+      offerExpiry: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000), // 10 days from now
+      offerDescription: 'New Product Launch Offer!',
+      wholesalePrice: '$89.99',
+      normalPrice: '$159.99',
+      daysRemaining: 10
+    },
+    {
+      id: 1002,
+      name: 'Cold-Pressed Olive Oil 10L',
+      category: 'Premium Oils',
+      price: '$79.99',
+      originalPrice: '$99.99',
+      discount: '20% OFF',
+      rating: 4.8,
+      delivery: 'Free shipping',
+      image: '🫒',
+      isNew: true,
+      offerExpiry: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
+      offerDescription: 'Limited Time Wholesale Price',
+      wholesalePrice: '$79.99',
+      normalPrice: '$99.99',
+      daysRemaining: 7
+    }
+  ]);
+
+  // Check for new product offers on component mount
+  useEffect(() => {
+    const hasActiveOffers = newProductsWithOffers.some(product => 
+      product.isNew && new Date(product.offerExpiry) > new Date()
+    );
+    
+    if (hasActiveOffers) {
+      // Show offer popup after a short delay
+      const timer = setTimeout(() => {
+        setShowNewProductOffer(true);
+        // Set the first available offer product
+        const activeOffer = newProductsWithOffers.find(product => 
+          product.isNew && new Date(product.offerExpiry) > new Date()
+        );
+        setCurrentOfferProduct(activeOffer);
+      }, 2000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [newProductsWithOffers]);
+
+  // Update days remaining periodically
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setNewProductsWithOffers(prevProducts => 
+        prevProducts.map(product => ({
+          ...product,
+          daysRemaining: Math.max(0, Math.ceil((new Date(product.offerExpiry) - new Date()) / (24 * 60 * 60 * 1000)))
+        }))
+      );
+    }, 60000); // Update every minute
+
+    return () => clearInterval(interval);
+  }, []);
 
   // Customer-focused stats
   const stats = [
@@ -61,8 +138,9 @@ const DashboardHome = () => {
     },
   ];
 
-  // Recommended Products
+  // Recommended Products (including new products with offers)
   const recommendedProducts = [
+    ...newProductsWithOffers.filter(product => product.isNew),
     {
       id: 1,
       name: 'Organic Basmati Rice 25kg',
@@ -72,7 +150,8 @@ const DashboardHome = () => {
       discount: '15% OFF',
       rating: 4.8,
       delivery: 'Next day delivery',
-      image: '🍚'
+      image: '🍚',
+      isNew: false
     },
     {
       id: 2,
@@ -83,7 +162,8 @@ const DashboardHome = () => {
       discount: '10% OFF',
       rating: 4.6,
       delivery: 'Free shipping',
-      image: '🛢️'
+      image: '🛢️',
+      isNew: false
     },
     {
       id: 3,
@@ -94,18 +174,8 @@ const DashboardHome = () => {
       discount: 'Bulk discount',
       rating: 4.7,
       delivery: '2-day delivery',
-      image: '📦'
-    },
-    {
-      id: 4,
-      name: 'Assorted Spices Pack',
-      category: 'Spices & Seasonings',
-      price: '$45.50',
-      originalPrice: '$56.90',
-      discount: '20% OFF',
-      rating: 4.9,
-      delivery: 'Same day',
-      image: '🌶️'
+      image: '📦',
+      isNew: false
     }
   ];
 
@@ -137,15 +207,6 @@ const DashboardHome = () => {
       amount: '$124.80',
       tracking: 'Preparing shipment',
       progress: 25
-    },
-    {
-      id: '#ORD-7809',
-      product: 'Beverage Assortment',
-      status: 'delivered',
-      date: '1 week ago',
-      amount: '$215.50',
-      tracking: 'Delivered',
-      progress: 100
     }
   ];
 
@@ -181,22 +242,6 @@ const DashboardHome = () => {
     { name: 'Processing', value: 15, color: '#f59e0b' }
   ];
 
-  // Monthly Spending Data
-  const spendingData = [
-    { month: 'Jan', amount: 12500 },
-    { month: 'Feb', amount: 11800 },
-    { month: 'Mar', amount: 14200 },
-    { month: 'Apr', amount: 15600 },
-    { month: 'May', amount: 13800 },
-    { month: 'Jun', amount: 16200 },
-    { month: 'Jul', amount: 14800 },
-    { month: 'Aug', amount: 17100 },
-    { month: 'Sep', amount: 15800 },
-    { month: 'Oct', amount: 16500 },
-    { month: 'Nov', amount: 18200 },
-    { month: 'Dec', amount: 19500 }
-  ];
-
   const getStatusColor = (status) => {
     const colors = {
       delivered: 'text-green-600 bg-green-50 border-green-200',
@@ -215,22 +260,142 @@ const DashboardHome = () => {
     return icons[status] || FiClock;
   };
 
-  const CustomTooltip = ({ active, payload, label }) => {
-    if (active && payload && payload.length) {
-      return (
-        <div className="bg-white p-3 border border-gray-200 rounded-lg shadow-lg">
-          <p className="font-semibold text-gray-900">{label}</p>
-          <p className="text-sm text-blue-600">
-            Spending: ${payload[0].value.toLocaleString()}
-          </p>
+  // Function to handle order placement with special offer
+  const handleSpecialOfferOrder = (product) => {
+    // Navigate to orders page with the special product pre-selected
+    window.location.href = `/customer-dashboard/orders?product=${product.id}&offer=true`;
+  };
+
+  // Function to add a new product with offer (simulating wholesaler action)
+  const addNewProductWithOffer = () => {
+    const newProduct = {
+      id: Date.now(),
+      name: 'Artisanal Honey 15kg',
+      category: 'Natural Sweeteners',
+      price: '$67.99',
+      originalPrice: '$84.99',
+      discount: '20% OFF',
+      rating: 4.9,
+      delivery: 'Free shipping',
+      image: '🍯',
+      isNew: true,
+      offerExpiry: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000),
+      offerDescription: 'New Product Launch Special!',
+      wholesalePrice: '$67.99',
+      normalPrice: '$84.99',
+      daysRemaining: 10
+    };
+
+    setNewProductsWithOffers(prev => [newProduct, ...prev]);
+    setCurrentOfferProduct(newProduct);
+    setShowNewProductOffer(true);
+  };
+
+  // New Product Offer Popup Component
+  const NewProductOfferPopup = () => {
+    if (!showNewProductOffer || !currentOfferProduct) return null;
+
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="bg-white rounded-2xl max-w-md w-full mx-auto shadow-xl">
+          {/* Header */}
+          <div className="flex items-center justify-between p-6 border-b border-gray-200">
+            <div className="flex items-center space-x-3">
+              <div className="p-2 bg-green-100 rounded-lg">
+                <FiAlertCircle className="w-6 h-6 text-green-600" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-gray-900">New Product Alert!</h3>
+                <p className="text-sm text-gray-500">Limited Time Offer</p>
+              </div>
+            </div>
+            <button 
+              onClick={() => setShowNewProductOffer(false)}
+              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            >
+              <FiX className="w-5 h-5 text-gray-500" />
+            </button>
+          </div>
+
+          {/* Product Info */}
+          <div className="p-6">
+            <div className="flex items-center space-x-4 mb-4">
+              <div className="w-16 h-16 bg-blue-50 rounded-lg flex items-center justify-center text-2xl">
+                {currentOfferProduct.image}
+              </div>
+              <div className="flex-1">
+                <h4 className="font-semibold text-gray-900">{currentOfferProduct.name}</h4>
+                <p className="text-sm text-gray-500">{currentOfferProduct.category}</p>
+                <div className="flex items-center space-x-2 mt-1">
+                  <span className="text-lg font-bold text-green-600">{currentOfferProduct.price}</span>
+                  <span className="text-sm text-gray-400 line-through">{currentOfferProduct.originalPrice}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Offer Details */}
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-medium text-yellow-800">
+                  {currentOfferProduct.offerDescription}
+                </span>
+                <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded">
+                  {currentOfferProduct.discount}
+                </span>
+              </div>
+              <div className="flex items-center justify-between text-sm text-yellow-700">
+                <span>Wholesale Price</span>
+                <span className="font-semibold">{currentOfferProduct.wholesalePrice}</span>
+              </div>
+              <div className="flex items-center justify-between text-sm text-yellow-700">
+                <span>Normal Price After</span>
+                <span className="font-semibold">{currentOfferProduct.normalPrice}</span>
+              </div>
+            </div>
+
+            {/* Countdown Timer */}
+            <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium text-red-700">Offer expires in:</span>
+                <span className="text-sm font-bold text-red-700">
+                  {currentOfferProduct.daysRemaining} days
+                </span>
+              </div>
+              <div className="w-full bg-red-200 rounded-full h-2 mt-2">
+                <div 
+                  className="bg-red-500 h-2 rounded-full transition-all duration-1000"
+                  style={{ width: `${(currentOfferProduct.daysRemaining / 10) * 100}%` }}
+                ></div>
+              </div>
+            </div>
+          </div>
+
+          {/* Actions */}
+          <div className="flex space-x-3 p-6 border-t border-gray-200">
+            <button
+              onClick={() => setShowNewProductOffer(false)}
+              className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+            >
+              Maybe Later
+            </button>
+            <button
+              onClick={() => handleSpecialOfferOrder(currentOfferProduct)}
+              className="flex-1 px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium flex items-center justify-center"
+            >
+              <FiShoppingCart className="w-4 h-4 mr-2" />
+              Order Now & Save
+            </button>
+          </div>
         </div>
-      );
-    }
-    return null;
+      </div>
+    );
   };
 
   return (
     <div className="space-y-6 font">
+      {/* New Product Offer Popup */}
+      <NewProductOfferPopup />
+
       {/* Header */}
       <div className="flex flex-col lg:flex-row items-start justify-between gap-4">
         <div className="flex-1">
@@ -250,6 +415,15 @@ const DashboardHome = () => {
           <button className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors">
             <FiShoppingCart className="w-4 h-4 mr-2" />
             New Order
+          </button>
+          
+          {/* Demo button to simulate wholesaler adding new product */}
+          <button 
+            onClick={addNewProductWithOffer}
+            className="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 transition-colors"
+          >
+            <FiPackage className="w-4 h-4 mr-2" />
+            Add Demo Product
           </button>
         </div>
       </div>
@@ -289,18 +463,47 @@ const DashboardHome = () => {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {recommendedProducts.map((product) => (
-                <div key={product.id} className="flex items-center space-x-4 p-4 border border-gray-100 rounded-lg hover:border-blue-200 hover:shadow-sm transition-all">
+                <div 
+                  key={product.id} 
+                  className={`flex items-center space-x-4 p-4 border rounded-lg hover:shadow-sm transition-all ${
+                    product.isNew 
+                      ? 'border-green-300 bg-green-50 border-2' 
+                      : 'border-gray-100 hover:border-blue-200'
+                  }`}
+                >
+                  {product.isNew && (
+                    <div className="absolute -top-2 -left-2">
+                      <span className="bg-green-500 text-white text-xs px-2 py-1 rounded-full font-medium">
+                        NEW
+                      </span>
+                    </div>
+                  )}
                   <div className="w-16 h-16 bg-blue-50 rounded-lg flex items-center justify-center text-2xl">
                     {product.image}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900 truncate">{product.name}</p>
-                    <p className="text-xs text-gray-500 mt-0.5">{product.category}</p>
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-900 truncate">{product.name}</p>
+                        <p className="text-xs text-gray-500 mt-0.5">{product.category}</p>
+                      </div>
+                      {product.isNew && (
+                        <div className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">
+                          {product.daysRemaining}d left
+                        </div>
+                      )}
+                    </div>
                     <div className="flex items-center justify-between mt-2">
                       <div className="flex items-center space-x-2">
                         <span className="text-lg font-bold text-gray-900">{product.price}</span>
                         <span className="text-sm text-gray-400 line-through">{product.originalPrice}</span>
-                        <span className="text-xs bg-red-100 text-red-700 px-1.5 py-0.5 rounded">{product.discount}</span>
+                        <span className={`text-xs px-1.5 py-0.5 rounded ${
+                          product.isNew 
+                            ? 'bg-green-100 text-green-700' 
+                            : 'bg-red-100 text-red-700'
+                        }`}>
+                          {product.discount}
+                        </span>
                       </div>
                       <div className="flex items-center text-xs text-gray-500">
                         <FiStar className="w-3 h-3 text-yellow-400 mr-1" />
@@ -312,8 +515,15 @@ const DashboardHome = () => {
                         <FiTruck className="w-3 h-3 mr-1" />
                         {product.delivery}
                       </span>
-                      <button className="text-xs bg-blue-600 text-white px-3 py-1.5 rounded hover:bg-blue-700 transition-colors">
-                        Add to Cart
+                      <button 
+                        onClick={() => product.isNew && setCurrentOfferProduct(product)}
+                        className={`text-xs px-3 py-1.5 rounded transition-colors ${
+                          product.isNew
+                            ? 'bg-green-600 text-white hover:bg-green-700'
+                            : 'bg-blue-600 text-white hover:bg-blue-700'
+                        }`}
+                      >
+                        {product.isNew ? 'Special Offer' : 'Add to Cart'}
                       </button>
                     </div>
                   </div>
@@ -413,42 +623,55 @@ const DashboardHome = () => {
             </div>
           </div>
 
-          {/* Order Analytics */}
+          {/* New Products Section */}
           <div className="bg-white rounded-xl border border-gray-200 p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-6">Order Analytics</h2>
-            <div className="h-48 mb-4">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={orderStatusData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={40}
-                    outerRadius={60}
-                    paddingAngle={2}
-                    dataKey="value"
-                  >
-                    {orderStatusData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip />
-                </PieChart>
-              </ResponsiveContainer>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-lg font-semibold text-gray-900">New Arrivals</h2>
+              <div className="p-2 bg-green-100 rounded-lg">
+                <FiPackage className="w-4 h-4 text-green-600" />
+              </div>
             </div>
-            <div className="space-y-2">
-              {orderStatusData.map((item, index) => (
-                <div key={index} className="flex items-center justify-between text-sm">
-                  <div className="flex items-center">
-                    <div 
-                      className="w-3 h-3 rounded-full mr-2"
-                      style={{ backgroundColor: item.color }}
-                    />
-                    <span className="text-gray-600">{item.name}</span>
+            <div className="space-y-4">
+              {newProductsWithOffers
+                .filter(product => product.isNew)
+                .map((product) => (
+                  <div key={product.id} className="p-4 border border-green-200 rounded-lg bg-green-50">
+                    <div className="flex items-center space-x-3 mb-3">
+                      <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center text-xl">
+                        {product.image}
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="font-medium text-gray-900 text-sm">{product.name}</h3>
+                        <p className="text-xs text-gray-500">{product.category}</p>
+                      </div>
+                      <span className="text-xs bg-green-500 text-white px-2 py-1 rounded-full">
+                        NEW
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between mb-2">
+                      <div>
+                        <span className="text-lg font-bold text-green-600">{product.price}</span>
+                        <span className="text-sm text-gray-400 line-through ml-2">{product.originalPrice}</span>
+                      </div>
+                      <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">
+                        {product.discount}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between text-xs text-gray-600 mb-3">
+                      <span>Offer ends in {product.daysRemaining} days</span>
+                      <span>After: {product.normalPrice}</span>
+                    </div>
+                    <button
+                      onClick={() => {
+                        setCurrentOfferProduct(product);
+                        setShowNewProductOffer(true);
+                      }}
+                      className="w-full bg-green-600 text-white py-2 rounded-lg text-sm font-medium hover:bg-green-700 transition-colors"
+                    >
+                      View Special Offer
+                    </button>
                   </div>
-                  <span className="font-medium text-gray-900">{item.value}%</span>
-                </div>
-              ))}
+                ))}
             </div>
           </div>
 
