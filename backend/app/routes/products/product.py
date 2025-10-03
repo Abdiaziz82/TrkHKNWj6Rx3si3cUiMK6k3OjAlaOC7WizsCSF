@@ -115,7 +115,7 @@ def get_products(current_user):
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
 
-# CREATE product (Admin only) - ULTIMATE VERSION
+# CREATE product (Admin only) - UPDATED WITH CATEGORY
 @products_bp.route("/products", methods=["POST"])
 @admin_required
 def create_product(current_user):
@@ -166,6 +166,7 @@ def create_product(current_user):
             name=str(data["name"]),
             sku=str(data["sku"]),
             description=str(data.get("description", "")),
+            category=str(data.get("category", "")),  # Add category field
             unit=str(data.get("unit", "kg")),
             price=float(data.get("price", 0)),
             stock=int(data.get("stock", 0)),
@@ -191,7 +192,7 @@ def create_product(current_user):
         traceback.print_exc()
         return jsonify({"success": False, "message": str(e)}), 500
 
-# BULK UPLOAD products from Excel/CSV (Admin only)
+# BULK UPLOAD products from Excel/CSV (Admin only) - UPDATED WITH CATEGORY
 @products_bp.route("/products/bulk-upload", methods=["POST"])
 @admin_required
 def bulk_upload_products(current_user):
@@ -248,6 +249,7 @@ def bulk_upload_products(current_user):
                 name = str(row['name']).strip()
                 sku = str(row['sku']).strip()
                 description = str(row['description']).strip() if 'description' in row and pd.notna(row['description']) else ""
+                category = str(row['category']).strip() if 'category' in row and pd.notna(row['category']) else ""  # Add category
                 unit = str(row['unit']).strip() if 'unit' in row and pd.notna(row['unit']) else "kg"
                 price = float(row['price']) if pd.notna(row['price']) else 0.0
                 stock = int(row['stock']) if pd.notna(row['stock']) else 0
@@ -270,6 +272,7 @@ def bulk_upload_products(current_user):
                     name=name,
                     sku=sku,
                     description=description,
+                    category=category,  # Add category
                     unit=unit,
                     price=price,
                     stock=stock,
@@ -302,7 +305,7 @@ def bulk_upload_products(current_user):
         db.session.rollback()
         return jsonify({"success": False, "message": f"File processing error: {str(e)}"}), 500
     
-# UPDATE product (Admin only) - UPDATED FOR IMAGE UPLOAD
+# UPDATE product (Admin only) - UPDATED WITH CATEGORY
 @products_bp.route("/products/<int:id>", methods=["PUT"])
 @admin_required
 def update_product(current_user, id):
@@ -353,13 +356,15 @@ def update_product(current_user, id):
                 delete_product_image(product.image_filename)
                 product.image_filename = None
 
-        # Update product fields
+        # Update product fields including category
         if "name" in data:
             product.name = str(data["name"])
         if "sku" in data:
             product.sku = str(data["sku"])
         if "description" in data:
             product.description = str(data["description"])
+        if "category" in data:  # Add category update
+            product.category = str(data["category"])
         if "unit" in data:
             product.unit = str(data["unit"])
         if "price" in data:
@@ -385,7 +390,7 @@ def update_product(current_user, id):
         db.session.rollback()
         print(f"Error updating product: {str(e)}")
         return jsonify({"success": False, "message": str(e)}), 500
-    
+
 # DELETE product (Admin only) - UPDATED TO DELETE IMAGE FILE
 @products_bp.route("/products/<int:id>", methods=["DELETE"])
 @admin_required
