@@ -11,6 +11,7 @@ import DashboardHome from "./pages/customerdashboard/DashboardHome";
 import Orders from "./pages/customerdashboard/Orders";
 import Products from "./pages/customerdashboard/Products";
 import Profile from "./pages/customerdashboard/Profile";
+import InventoryManagement from "./components/AdminDashboard/InventoryManagement";
 import AdminProtectedRoute from "./components/AdminDashboard/AdminProtectedRoute";
 import AdminLayout from "./components/AdminDashboard/AdminLayout";
 import AdminDashboardHome from "./pages/AdminDashboard/AdminDashboardHome";
@@ -20,6 +21,8 @@ import AdminProfile from "./pages/AdminDashboard/AdminProfile";
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(null);
   const [loading, setLoading] = useState(true);
+
+
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -46,6 +49,8 @@ function App() {
     checkAuth();
   }, []);
 
+ 
+
   // Show loading spinner while checking authentication
   if (loading) {
     return (
@@ -57,6 +62,7 @@ function App() {
       </div>
     );
   }
+
 
   return (
     <>
@@ -88,8 +94,12 @@ function App() {
         <Route path="/admin-dashboard" element={
           <AdminProtectedRoute>
             <AdminLayout />
+
+           
           </AdminProtectedRoute>
+          
         }>
+          <Route path="/admin-dashboard/inventory-management" element={<InventoryManagement />} />
           <Route index element={<AdminDashboardHome />} />
           <Route path="inventory-management" element={<UserManagement />} />
           <Route path="products" element={<div>Admin Products Page</div>} />
