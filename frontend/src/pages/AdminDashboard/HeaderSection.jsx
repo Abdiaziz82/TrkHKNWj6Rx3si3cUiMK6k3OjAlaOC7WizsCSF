@@ -12,13 +12,13 @@ const HeaderSection = ({
   return (
     <>
       {/* Header */}
-      <div className="mb-4">
+      <div className="mb-4 font">
         <h1 className="text-2xl font-bold text-gray-900">Inventory Management</h1>
         <p className="text-gray-600">Manage your products, stock levels, and inventory</p>
       </div>
 
       {/* Bulk Upload Section */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-4">
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-4 font">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-4 sm:space-y-0">
           <div>
             <h3 className="text-lg font-semibold text-gray-900 mb-2">Bulk Operations</h3>
@@ -49,7 +49,7 @@ const HeaderSection = ({
       </div>
 
       {/* Action Bar with Search and Add Product */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-4">
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-4 font">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-4 sm:space-y-0">
           {/* Search */}
           <div className="flex-1 max-w-md">
