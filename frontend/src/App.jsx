@@ -16,6 +16,16 @@ import AdminProtectedRoute from "./components/AdminDashboard/AdminProtectedRoute
 import AdminLayout from "./components/AdminDashboard/AdminLayout";
 import AdminDashboardHome from "./pages/AdminDashboard/AdminDashboardHome";
 import AdminProfile from "./pages/AdminDashboard/AdminProfile";
+import OrdersManagement from "./pages/AdminDashboard/OrdersManagement";
+import LedgerPayments from "./pages/AdminDashboard/LedgerPayments";
+import RetailerProfiles from "./pages/AdminDashboard/RetailerProfiles";
+import AnalyticsForecasting from "./pages/AdminDashboard/AnalyticsForecasting";
+import DigitalMarketingTools from "./pages/AdminDashboard/DigitalMarketingTools";
+import Settings from "./pages/AdminDashboard/Settings";
+import Payments from "./pages/customerdashboard/Payments";
+import Messages from "./pages/customerdashboard/Messages";
+import Analytics from "./pages/customerdashboard/Analytics";
+import CustomerSettings from "./pages/customerdashboard/CustomerSettings";
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(null);
@@ -83,9 +93,10 @@ function App() {
           <Route path="orders" element={<Orders />} />
           <Route path="products" element={<Products />} />
           <Route path="profile" element={<Profile />} />
-          <Route path="messages" element={<div>Messages Page</div>} />
-          <Route path="analytics" element={<div>Analytics Page</div>} />
-          <Route path="settings" element={<div>Settings Page</div>} />
+          <Route path="payments" element={<Payments />} />
+          <Route path="messages" element={<Messages />} />
+          <Route path="analytics" element={<Analytics />} />
+          <Route path="customersettings" element={<CustomerSettings />} />
           <Route path="help" element={<div>Help Page</div>} />
         </Route>
 
@@ -98,15 +109,19 @@ function App() {
           </AdminProtectedRoute>
           
         }>
+
          
           <Route index element={<AdminDashboardHome />} />
           <Route path="inventory-management" element={<InventoryManagement />} />
+
           <Route path="products" element={<div>Admin Products Page</div>} />
-          <Route path="orders-management" element={<div>Admin Orders Page</div>} />
-          <Route path="analytics" element={<div>Admin Analytics Page</div>} />
-          <Route path="finance" element={<div>Finance Page</div>} />
+          <Route path="orders-management" element={<OrdersManagement />} />
+           <Route path="ledger-payments" element={<LedgerPayments />} />
+           <Route path="retailer-profiles" element={<RetailerProfiles />} />
+          <Route path="analytics-forecasting" element={<AnalyticsForecasting />} />
+          <Route path="digital-marketing-tools" element={<DigitalMarketingTools />} />
           <Route path="profile" element={<AdminProfile />} />
-          <Route path="settings" element={<div>System Settings Page</div>} />
+          <Route path="settings" element={<Settings />} />
           <Route path="help" element={<div>Admin Help Page</div>} />
         </Route>
       </Routes>
