@@ -1,415 +1,888 @@
-import React, { useState, useMemo } from 'react';
-import { useReactTable, getCoreRowModel, getFilteredRowModel, getSortedRowModel, getPaginationRowModel } from '@tanstack/react-table';
-import AIBot from './AIBot';
-import OrderManagement from './OrderManagement';
-import TableSection from './TableSection';
+import React, { useState, useEffect } from 'react';
+import {
+  useReactTable,
+  createColumnHelper,
+  getCoreRowModel,
+  getSortedRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  flexRender,
+} from '@tanstack/react-table';
+import {
+  ChevronUpIcon,
+  ChevronDownIcon,
+  MagnifyingGlassIcon,
+  PrinterIcon,
+  EyeIcon,
+  PencilIcon,
+  TrashIcon,
+  DocumentTextIcon,
+  CheckIcon,
+  XMarkIcon,
+} from '@heroicons/react/24/outline';
 
-function OrdersManagement() {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [messages, setMessages] = useState([
-    { 
-      id: 1, 
-      text: "👋 Hello! I'm your AI Order Assistant. I can help you:\n\n• Create new orders via chat\n• Update order status\n• Search and filter orders\n• Generate order insights\n• Process bulk uploads\n\nTry saying: 'Customer +1 (555) 123-4567 wants to order 3 bags of sugar'", 
-      sender: 'ai', 
-      timestamp: new Date(),
-      type: 'info'
-    }
-  ]);
-  const [inputText, setInputText] = useState('');
-  const [isListening, setIsListening] = useState(false);
-  const [isProcessing, setIsProcessing] = useState(false);
+// Mock data - replace with your actual API call
+const mockOrders = [
+  {
+    id: '1',
+    customerName: 'John Smith',
+    customerPhone: '+1 (555) 123-4567',
+    product: 'Premium Widget A',
+    qty: 5,
+    unitPrice: 29.99,
+    total: 149.95,
+    method: 'Credit Card',
+    status: 'completed',
+    date: '2024-01-15',
+  },
+  {
+    id: '2',
+    customerName: 'Sarah Johnson',
+    customerPhone: '+1 (555) 987-6543',
+    product: 'Standard Widget B',
+    qty: 10,
+    unitPrice: 15.50,
+    total: 155.00,
+    method: 'Bank Transfer',
+    status: 'pending',
+    date: '2024-01-16',
+  },
+  {
+    id: '3',
+    customerName: 'Michael Brown',
+    customerPhone: '+1 (555) 456-7890',
+    product: 'Deluxe Widget C',
+    qty: 2,
+    unitPrice: 79.99,
+    total: 159.98,
+    method: 'Cash',
+    status: 'shipped',
+    date: '2024-01-14',
+  },
+  {
+    id: '4',
+    customerName: 'Emily Davis',
+    customerPhone: '+1 (555) 234-5678',
+    product: 'Basic Widget D',
+    qty: 20,
+    unitPrice: 9.99,
+    total: 199.80,
+    method: 'Credit Card',
+    status: 'cancelled',
+    date: '2024-01-13',
+  },
+  {
+    id: '5',
+    customerName: 'David Wilson',
+    customerPhone: '+1 (555) 876-5432',
+    product: 'Premium Widget A',
+    qty: 8,
+    unitPrice: 29.99,
+    total: 239.92,
+    method: 'Bank Transfer',
+    status: 'completed',
+    date: '2024-01-12',
+  },
+];
 
-  // Enhanced orders data with more realistic information
-  const [orders, setOrders] = useState([
-    {
-      id: 1,
-      customer_phone: "+1 (555) 123-4567",
-      customer_name: "John Smith",
-      product_name: "Sugar 50kg",
-      quantity: 2,
-      unit_price: 45.99,
-      total_price: 91.98,
-      order_method: "chatbot",
-      status: "pending",
-      created_at: new Date('2024-01-15'),
-      notes: "Urgent delivery requested"
-    },
-    {
-      id: 2,
-      customer_phone: "+1 (555) 987-6543",
-      customer_name: "Maria Garcia",
-      product_name: "Coffee Beans 1kg",
-      quantity: 5,
-      unit_price: 28.50,
-      total_price: 142.50,
-      order_method: "phone",
-      status: "completed",
-      created_at: new Date('2024-01-14'),
-      notes: "Regular customer"
-    },
-    {
-      id: 3,
-      customer_phone: "+1 (555) 456-7890",
-      customer_name: "David Johnson",
-      product_name: "Flour 25kg",
-      quantity: 10,
-      unit_price: 32.75,
-      total_price: 327.50,
-      order_method: "website",
-      status: "processing",
-      created_at: new Date('2024-01-16'),
-      notes: "Bulk order discount applied"
-    }
-  ]);
+const columnHelper = createColumnHelper();
 
-  const [editingOrder, setEditingOrder] = useState(null);
+const OrdersManagement = () => {
+  const [data, setData] = useState([]);
   const [globalFilter, setGlobalFilter] = useState('');
+  const [sorting, setSorting] = useState([]);
+  const [statusFilter, setStatusFilter] = useState('');
+  const [editingOrder, setEditingOrder] = useState(null);
+  const [editForm, setEditForm] = useState({});
 
-  const [formData, setFormData] = useState({
-    customer_phone: '',
-    customer_name: '',
-    product_name: '',
-    quantity: '',
-    unit_price: '',
-    notes: ''
-  });
+  // Fetch data - replace with your actual API call
+  useEffect(() => {
+    // Simulate API call
+    setData(mockOrders);
+  }, []);
 
-  // Product catalog for AI to reference
-  const productCatalog = [
-    { name: "Sugar 50kg", price: 45.99, category: "basics" },
-    { name: "Coffee Beans 1kg", price: 28.50, category: "beverages" },
-    { name: "Flour 25kg", price: 32.75, category: "basics" },
-    { name: "Rice 20kg", price: 38.25, category: "basics" },
-    { name: "Tea Leaves 500g", price: 15.75, category: "beverages" }
+  // Initialize edit form when editing starts
+  useEffect(() => {
+    if (editingOrder) {
+      setEditForm({ ...editingOrder });
+    }
+  }, [editingOrder]);
+
+  const handleEditChange = (field, value) => {
+    setEditForm(prev => {
+      const updatedForm = { ...prev, [field]: value };
+      
+      // Recalculate total if quantity or unit price changes
+      if (field === 'qty' || field === 'unitPrice') {
+        const qty = field === 'qty' ? parseInt(value) || 0 : parseInt(prev.qty) || 0;
+        const unitPrice = field === 'unitPrice' ? parseFloat(value) || 0 : parseFloat(prev.unitPrice) || 0;
+        updatedForm.total = (qty * unitPrice).toFixed(2);
+      }
+      
+      return updatedForm;
+    });
+  };
+
+  const handleSaveEdit = () => {
+    if (editingOrder) {
+      setData(prevData =>
+        prevData.map(item =>
+          item.id === editingOrder.id ? { ...editForm } : item
+        )
+      );
+      
+      // Show success message
+      showMessage('Order updated successfully!', 'green');
+      setEditingOrder(null);
+      setEditForm({});
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditingOrder(null);
+    setEditForm({});
+  };
+
+  const showMessage = (message, color = 'blue') => {
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `fixed top-4 right-4 bg-${color}-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 transition-all duration-300`;
+    messageDiv.textContent = message;
+    document.body.appendChild(messageDiv);
+    
+    setTimeout(() => {
+      messageDiv.remove();
+    }, 3000);
+  };
+
+  const columns = [
+    columnHelper.accessor('customerName', {
+      header: 'Customer Name',
+      cell: (info) => {
+        const order = info.row.original;
+        const isEditing = editingOrder?.id === order.id;
+        
+        if (isEditing) {
+          return (
+            <input
+              type="text"
+              value={editForm.customerName || ''}
+              onChange={(e) => handleEditChange('customerName', e.target.value)}
+              className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+              placeholder="Customer Name"
+            />
+          );
+        }
+        
+        return (
+          <div className="font-medium text-gray-900">
+            {info.getValue()}
+          </div>
+        );
+      },
+    }),
+    columnHelper.accessor('customerPhone', {
+      header: 'Phone',
+      cell: (info) => {
+        const order = info.row.original;
+        const isEditing = editingOrder?.id === order.id;
+        
+        if (isEditing) {
+          return (
+            <input
+              type="tel"
+              value={editForm.customerPhone || ''}
+              onChange={(e) => handleEditChange('customerPhone', e.target.value)}
+              className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+              placeholder="Phone Number"
+            />
+          );
+        }
+        
+        return (
+          <div className="text-gray-600">
+            {info.getValue()}
+          </div>
+        );
+      },
+    }),
+    columnHelper.accessor('product', {
+      header: 'Product',
+      cell: (info) => {
+        const order = info.row.original;
+        const isEditing = editingOrder?.id === order.id;
+        
+        if (isEditing) {
+          return (
+            <select
+              value={editForm.product || ''}
+              onChange={(e) => handleEditChange('product', e.target.value)}
+              className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+            >
+              <option value="">Select Product</option>
+              <option value="Premium Widget A">Premium Widget A</option>
+              <option value="Standard Widget B">Standard Widget B</option>
+              <option value="Deluxe Widget C">Deluxe Widget C</option>
+              <option value="Basic Widget D">Basic Widget D</option>
+              <option value="Enterprise Widget E">Enterprise Widget E</option>
+            </select>
+          );
+        }
+        
+        return info.getValue();
+      },
+    }),
+    columnHelper.accessor('qty', {
+      header: 'Qty',
+      cell: (info) => {
+        const order = info.row.original;
+        const isEditing = editingOrder?.id === order.id;
+        
+        if (isEditing) {
+          return (
+            <input
+              type="number"
+              min="1"
+              value={editForm.qty || ''}
+              onChange={(e) => handleEditChange('qty', e.target.value)}
+              className="w-20 px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+            />
+          );
+        }
+        
+        return (
+          <div className="text-center">
+            {info.getValue()}
+          </div>
+        );
+      },
+    }),
+    columnHelper.accessor('unitPrice', {
+      header: 'Unit Price',
+      cell: (info) => {
+        const order = info.row.original;
+        const isEditing = editingOrder?.id === order.id;
+        
+        if (isEditing) {
+          return (
+            <div className="flex items-center">
+              <span className="text-gray-500 mr-1">$</span>
+              <input
+                type="number"
+                step="0.01"
+                min="0"
+                value={editForm.unitPrice || ''}
+                onChange={(e) => handleEditChange('unitPrice', e.target.value)}
+                className="w-24 px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+              />
+            </div>
+          );
+        }
+        
+        return `$${info.getValue().toFixed(2)}`;
+      },
+    }),
+    columnHelper.accessor('total', {
+      header: 'Total',
+      cell: (info) => {
+        const order = info.row.original;
+        const isEditing = editingOrder?.id === order.id;
+        
+        if (isEditing) {
+          return (
+            <div className="font-semibold text-gray-900">
+              ${editForm.total || '0.00'}
+            </div>
+          );
+        }
+        
+        return (
+          <div className="font-semibold text-gray-900">
+            ${info.getValue().toFixed(2)}
+          </div>
+        );
+      },
+    }),
+    columnHelper.accessor('method', {
+      header: 'Payment Method',
+      cell: (info) => {
+        const order = info.row.original;
+        const isEditing = editingOrder?.id === order.id;
+        
+        if (isEditing) {
+          return (
+            <select
+              value={editForm.method || ''}
+              onChange={(e) => handleEditChange('method', e.target.value)}
+              className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+            >
+              <option value="">Select Method</option>
+              <option value="Credit Card">Credit Card</option>
+              <option value="Bank Transfer">Bank Transfer</option>
+              <option value="Cash">Cash</option>
+              <option value="PayPal">PayPal</option>
+              <option value="Digital Wallet">Digital Wallet</option>
+            </select>
+          );
+        }
+        
+        return (
+          <div className="text-gray-600">
+            {info.getValue()}
+          </div>
+        );
+      },
+    }),
+    columnHelper.accessor('status', {
+      header: 'Status',
+      cell: (info) => {
+        const order = info.row.original;
+        const isEditing = editingOrder?.id === order.id;
+        const status = isEditing ? editForm.status : info.getValue();
+        
+        const statusColors = {
+          pending: 'bg-yellow-100 text-yellow-800 border border-yellow-200',
+          completed: 'bg-green-100 text-green-800 border border-green-200',
+          cancelled: 'bg-red-100 text-red-800 border border-red-200',
+          shipped: 'bg-blue-100 text-blue-800 border border-blue-200',
+        };
+        
+        if (isEditing) {
+          return (
+            <select
+              value={status || ''}
+              onChange={(e) => handleEditChange('status', e.target.value)}
+              className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+            >
+              <option value="pending">Pending</option>
+              <option value="completed">Completed</option>
+              <option value="shipped">Shipped</option>
+              <option value="cancelled">Cancelled</option>
+            </select>
+          );
+        }
+        
+        return (
+          <span
+            className={`px-3 py-1 rounded-full text-xs font-semibold ${statusColors[status]}`}
+          >
+            {status.charAt(0).toUpperCase() + status.slice(1)}
+          </span>
+        );
+      },
+    }),
+    columnHelper.accessor('date', {
+      header: 'Date',
+      cell: (info) => {
+        const order = info.row.original;
+        const isEditing = editingOrder?.id === order.id;
+        
+        if (isEditing) {
+          return (
+            <input
+              type="date"
+              value={editForm.date || ''}
+              onChange={(e) => handleEditChange('date', e.target.value)}
+              className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+            />
+          );
+        }
+        
+        return (
+          <div className="text-gray-600">
+            {new Date(info.getValue()).toLocaleDateString('en-US', {
+              year: 'numeric',
+              month: 'short',
+              day: 'numeric'
+            })}
+          </div>
+        );
+      },
+    }),
+    columnHelper.display({
+      id: 'actions',
+      header: 'Actions',
+      cell: ({ row }) => {
+        const order = row.original;
+        const isEditing = editingOrder?.id === order.id;
+        
+        if (isEditing) {
+          return (
+            <div className="flex space-x-2 justify-center">
+              <button
+                onClick={handleSaveEdit}
+                className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors duration-200"
+                title="Save Changes"
+              >
+                <CheckIcon className="w-5 h-5" />
+              </button>
+              <button
+                onClick={handleCancelEdit}
+                className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors duration-200"
+                title="Cancel Edit"
+              >
+                <XMarkIcon className="w-5 h-5" />
+              </button>
+            </div>
+          );
+        }
+        
+        return (
+          <div className="flex space-x-2 justify-center">
+            <button
+              onClick={() => handlePrintReceipt(order)}
+              className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors duration-200"
+              title="Print Receipt"
+            >
+              <PrinterIcon className="w-5 h-5" />
+            </button>
+            <button
+              onClick={() => handleViewOrder(order)}
+              className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors duration-200"
+              title="View Order Details"
+            >
+              <EyeIcon className="w-5 h-5" />
+            </button>
+            <button
+              onClick={() => handleEditOrder(order)}
+              className="p-2 text-orange-600 hover:bg-orange-50 rounded-lg transition-colors duration-200"
+              title="Edit Order"
+            >
+              <PencilIcon className="w-5 h-5" />
+            </button>
+            <button
+              onClick={() => handleDeleteOrder(order)}
+              className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors duration-200"
+              title="Delete Order"
+            >
+              <TrashIcon className="w-5 h-5" />
+            </button>
+          </div>
+        );
+      },
+    }),
   ];
 
-  // Define columns for TanStack Table
-  const columns = useMemo(() => [
-    {
-      accessorKey: 'id',
-      header: 'ID',
-      size: 60,
-    },
-    {
-      accessorKey: 'customer_name',
-      header: 'Customer Name',
-      size: 150,
-    },
-    {
-      accessorKey: 'customer_phone',
-      header: 'Phone',
-      size: 150,
-    },
-    {
-      accessorKey: 'product_name',
-      header: 'Product',
-      size: 150,
-    },
-    {
-      accessorKey: 'quantity',
-      header: 'Qty',
-      size: 80,
-    },
-    {
-      accessorKey: 'unit_price',
-      header: 'Unit Price',
-      size: 100,
-      cell: ({ getValue }) => `$${getValue().toFixed(2)}`,
-    },
-    {
-      accessorKey: 'total_price',
-      header: 'Total',
-      size: 100,
-      cell: ({ getValue }) => `$${getValue().toFixed(2)}`,
-    },
-    {
-      accessorKey: 'status',
-      header: 'Status',
-      size: 120,
-      cell: ({ getValue }) => (
-        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-          getValue() === 'completed' ? 'bg-green-100 text-green-800' :
-          getValue() === 'processing' ? 'bg-blue-100 text-blue-800' :
-          'bg-yellow-100 text-yellow-800'
-        }`}>
-          {getValue()}
-        </span>
-      ),
-    },
-    {
-      accessorKey: 'created_at',
-      header: 'Date',
-      size: 120,
-      cell: ({ getValue }) => getValue().toLocaleDateString(),
-    },
-  ], []);
+  // Filter data based on status
+  const filteredData = React.useMemo(() => {
+    if (!statusFilter) return data;
+    return data.filter(order => order.status === statusFilter);
+  }, [data, statusFilter]);
 
-  // Initialize TanStack Table
   const table = useReactTable({
-    data: orders,
+    data: filteredData,
     columns,
     state: {
       globalFilter,
+      sorting,
     },
     onGlobalFilterChange: setGlobalFilter,
+    onSortingChange: setSorting,
     getCoreRowModel: getCoreRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
     getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
   });
 
-  // Enhanced AI order processing
-  const processOrderCommand = (text) => {
-    setIsProcessing(true);
+  // Action handlers
+  const handlePrintReceipt = (order) => {
+    console.log('Print receipt for order:', order);
     
-    // Simulate AI processing delay
-    setTimeout(() => {
-      const lowerText = text.toLowerCase();
-      
-      // Create new order
-      if (lowerText.includes('order') || lowerText.includes('create') || lowerText.includes('new')) {
-        // Extract phone number
-        const phoneMatch = text.match(/\+1\s?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}/);
-        const phone = phoneMatch ? phoneMatch[0] : '+1 (555) XXX-XXXX';
-        
-        // Extract quantity
-        const quantityMatch = text.match(/\b(\d+)\s*(bags?|units?|pieces?|kgs?)?\b/i);
-        const quantity = quantityMatch ? parseInt(quantityMatch[1]) : 1;
-        
-        // Find product
-        const product = productCatalog.find(p => 
-          lowerText.includes(p.name.toLowerCase().split(' ')[0])
-        ) || productCatalog[0];
-        
-        const newOrder = {
-          id: Math.max(...orders.map(o => o.id)) + 1,
-          customer_phone: phone,
-          customer_name: 'New Customer',
-          product_name: product.name,
-          quantity: quantity,
-          unit_price: product.price,
-          total_price: product.price * quantity,
-          order_method: 'chatbot',
-          status: 'pending',
-          created_at: new Date(),
-          notes: `Created via AI chat: "${text}"`
-        };
-        
-        setOrders(prev => [...prev, newOrder]);
-        setMessages(prev => [...prev, {
-          id: Date.now(),
-          text: `✅ Order created successfully!\n\n• Customer: ${phone}\n• Product: ${product.name}\n• Quantity: ${quantity}\n• Total: $${(product.price * quantity).toFixed(2)}\n\nOrder #${newOrder.id} is now pending.`,
-          sender: 'ai',
-          timestamp: new Date(),
-          type: 'success'
-        }]);
-        
-        // Auto-filter to show the new order
-        setGlobalFilter(phone);
-      }
-      // Search orders
-      else if (lowerText.includes('search') || lowerText.includes('find') || lowerText.includes('lookup')) {
-        const searchTerm = text.replace(/search|find|lookup|for|orders?/gi, '').trim();
-        if (searchTerm) {
-          setGlobalFilter(searchTerm);
-          setMessages(prev => [...prev, {
-            id: Date.now(),
-            text: `🔍 Searching orders for: "${searchTerm}"\n\nFound ${table.getRowModel().rows.length} matching orders.`,
-            sender: 'ai',
-            timestamp: new Date(),
-            type: 'info'
-          }]);
-        }
-      }
-      // Status update
-      else if (lowerText.includes('status') || lowerText.includes('update')) {
-        setMessages(prev => [...prev, {
-          id: Date.now(),
-          text: `To update an order status, click the status badge in the orders table or use the edit button. I can help you search for specific orders first!`,
-          sender: 'ai',
-          timestamp: new Date(),
-          type: 'info'
-        }]);
-      }
-      // Default response
-      else {
-        setMessages(prev => [...prev, {
-          id: Date.now(),
-          text: `I can help you with:\n\n• Creating new orders\n• Searching existing orders\n• Order status updates\n• Product information\n\nTry something like: "Create order for 2 bags of coffee for customer +1 (555) 999-8888"`,
-          sender: 'ai',
-          timestamp: new Date(),
-          type: 'info'
-        }]);
-      }
-      
-      setIsProcessing(false);
-    }, 1500);
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Receipt - Order #${order.id}</title>
+          <style>
+            body { font-family: Arial, sans-serif; margin: 20px; }
+            .receipt { border: 1px solid #000; padding: 20px; max-width: 400px; }
+            .header { text-align: center; margin-bottom: 20px; }
+            .section { margin: 10px 0; }
+            .total { font-weight: bold; font-size: 1.2em; margin-top: 10px; }
+          </style>
+        </head>
+        <body>
+          <div class="receipt">
+            <div class="header">
+              <h2>ORDER RECEIPT</h2>
+              <p>Order #${order.id}</p>
+            </div>
+            <div class="section">
+              <p><strong>Date:</strong> ${new Date(order.date).toLocaleDateString()}</p>
+              <p><strong>Customer:</strong> ${order.customerName}</p>
+              <p><strong>Phone:</strong> ${order.customerPhone}</p>
+            </div>
+            <div class="section">
+              <p><strong>Product:</strong> ${order.product}</p>
+              <p><strong>Quantity:</strong> ${order.qty}</p>
+              <p><strong>Unit Price:</strong> $${order.unitPrice.toFixed(2)}</p>
+              <p class="total">Total: $${order.total.toFixed(2)}</p>
+            </div>
+            <div class="section">
+              <p><strong>Payment Method:</strong> ${order.method}</p>
+              <p><strong>Status:</strong> ${order.status.charAt(0).toUpperCase() + order.status.slice(1)}</p>
+            </div>
+          </div>
+          <script>
+            window.onload = function() {
+              window.print();
+              setTimeout(() => window.close(), 500);
+            }
+          </script>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
   };
 
-  const handleSendMessage = async (text = inputText) => {
-    if (!text.trim()) return;
-
-    // Add user message
-    const userMessage = {
-      id: Date.now(),
-      text: text,
-      sender: 'user',
-      timestamp: new Date()
+  const handleViewOrder = (order) => {
+    console.log('View order:', order);
+    
+    const modal = document.createElement('div');
+    modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+    modal.innerHTML = `
+      <div class="bg-white rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-xl font-bold text-gray-900">Order Details - #${order.id}</h3>
+          <button onclick="this.closest('.fixed').remove()" class="text-gray-500 hover:text-gray-700">
+            &times;
+          </button>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <h4 class="font-semibold text-gray-700 mb-2">Customer Information</h4>
+            <div class="space-y-2">
+              <p><strong>Name:</strong> ${order.customerName}</p>
+              <p><strong>Phone:</strong> ${order.customerPhone}</p>
+              <p><strong>Order Date:</strong> ${new Date(order.date).toLocaleDateString()}</p>
+            </div>
+          </div>
+          
+          <div>
+            <h4 class="font-semibold text-gray-700 mb-2">Order Information</h4>
+            <div class="space-y-2">
+              <p><strong>Status:</strong> 
+                <span class="ml-2 px-2 py-1 rounded-full text-xs font-medium ${
+                  order.status === 'completed' ? 'bg-green-100 text-green-800' :
+                  order.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                  order.status === 'shipped' ? 'bg-blue-100 text-blue-800' :
+                  'bg-red-100 text-red-800'
+                }">
+                  ${order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                </span>
+              </p>
+              <p><strong>Payment Method:</strong> ${order.method}</p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="mt-6">
+          <h4 class="font-semibold text-gray-700 mb-2">Product Details</h4>
+          <div class="border rounded-lg p-4">
+            <div class="flex justify-between items-center">
+              <div>
+                <p class="font-medium">${order.product}</p>
+                <p class="text-sm text-gray-600">Quantity: ${order.qty}</p>
+              </div>
+              <div class="text-right">
+                <p class="text-sm text-gray-600">Unit Price: $${order.unitPrice.toFixed(2)}</p>
+                <p class="font-semibold">Total: $${order.total.toFixed(2)}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="mt-6 flex justify-end space-x-3">
+          <button onclick="this.closest('.fixed').remove()" class="px-4 py-2 text-gray-600 hover:text-gray-800">
+            Close
+          </button>
+          <button onclick="handlePrintReceiptFromModal(${JSON.stringify(order).replace(/"/g, '&quot;')})" 
+                  class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+            Print Receipt
+          </button>
+        </div>
+      </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    window.handlePrintReceiptFromModal = (orderData) => {
+      modal.remove();
+      handlePrintReceipt(orderData);
     };
-    
-    setMessages(prev => [...prev, userMessage]);
-    setInputText('');
-    
-    // Process AI response
-    processOrderCommand(text);
   };
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (editingOrder) {
-      setOrders(prev => prev.map(order => 
-        order.id === editingOrder.id 
-          ? { ...editingOrder, ...formData, total_price: formData.quantity * formData.unit_price }
-          : order
-      ));
-      setEditingOrder(null);
-    } else {
-      const newOrder = {
-        id: Math.max(...orders.map(o => o.id), 0) + 1,
-        ...formData,
-        quantity: parseInt(formData.quantity),
-        unit_price: parseFloat(formData.unit_price),
-        total_price: parseFloat(formData.quantity) * parseFloat(formData.unit_price),
-        order_method: "manual",
-        status: "pending",
-        created_at: new Date()
-      };
-      setOrders(prev => [...prev, newOrder]);
-    }
-    
-    setFormData({
-      customer_phone: '',
-      customer_name: '',
-      product_name: '',
-      quantity: '',
-      unit_price: '',
-      notes: ''
-    });
-  };
-
-  const handleEdit = (order) => {
+  const handleEditOrder = (order) => {
     setEditingOrder(order);
-    setFormData({
-      customer_phone: order.customer_phone,
-      customer_name: order.customer_name,
-      product_name: order.product_name,
-      quantity: order.quantity,
-      unit_price: order.unit_price,
-      notes: order.notes || ''
-    });
   };
 
-  const handleDelete = (id) => {
-    setOrders(prev => prev.filter(order => order.id !== id));
-  };
-
-  const handleStatusChange = (id, newStatus) => {
-    setOrders(prev => prev.map(order => 
-      order.id === id ? { ...order, status: newStatus } : order
-    ));
-  };
-
-  const handleFileUpload = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      // Simulate file processing
-      setTimeout(() => {
-        setMessages(prev => [...prev, {
-          id: Date.now(),
-          text: `📁 File "${file.name}" processed successfully! Added 3 new orders from bulk upload.`,
-          sender: 'ai',
-          timestamp: new Date(),
-          type: 'success'
-        }]);
-      }, 2000);
+  const handleDeleteOrder = (order) => {
+    console.log('Delete order:', order);
+    
+    if (confirm(`Are you sure you want to delete order #${order.id} for ${order.customerName}? This action cannot be undone.`)) {
+      setData(prevData => prevData.filter(item => item.id !== order.id));
+      showMessage(`Order #${order.id} has been deleted.`, 'red');
     }
   };
 
-  const exportOrders = () => {
-    const dataStr = JSON.stringify(orders, null, 2);
-    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-    const exportFileDefaultName = `orders_${new Date().toISOString().split('T')[0]}.json`;
+  const handleExportCSV = () => {
+    const headers = ['ID', 'Customer Name', 'Phone', 'Product', 'Quantity', 'Unit Price', 'Total', 'Payment Method', 'Status', 'Date'];
+    const csvData = filteredData.map(order => [
+      order.id,
+      order.customerName,
+      order.customerPhone,
+      order.product,
+      order.qty,
+      order.unitPrice,
+      order.total,
+      order.method,
+      order.status,
+      order.date
+    ]);
     
-    const linkElement = document.createElement('a');
-    linkElement.setAttribute('href', dataUri);
-    linkElement.setAttribute('download', exportFileDefaultName);
-    linkElement.click();
+    const csvContent = [
+      headers.join(','),
+      ...csvData.map(row => row.map(field => `"${field}"`).join(','))
+    ].join('\n');
+    
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `orders-export-${new Date().toISOString().split('T')[0]}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+    
+    showMessage(`Exported ${filteredData.length} orders to CSV file.`, 'green');
   };
 
   return (
-    <div className="flex h-screen bg-slate-50">
-      <AIBot
-        sidebarOpen={sidebarOpen}
-        setSidebarOpen={setSidebarOpen}
-        messages={messages}
-        setMessages={setMessages}
-        inputText={inputText}
-        setInputText={setInputText}
-        isListening={isListening}
-        setIsListening={setIsListening}
-        isProcessing={isProcessing}
-        handleSendMessage={handleSendMessage}
-        processOrderCommand={processOrderCommand}
-        productCatalog={productCatalog}
-        orders={orders}
-        setGlobalFilter={setGlobalFilter}
-        table={table}
-      />
+    <div className="min-h-screen bg-gray-50 p-6 font">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900">Order Management</h1>
+          <p className="text-gray-600 mt-2">
+            Manage and track all customer orders from one place
+          </p>
+        </div>
 
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <OrderManagement
-          orders={orders}
-          setOrders={setOrders}
-          editingOrder={editingOrder}
-          setEditingOrder={setEditingOrder}
-          formData={formData}
-          setFormData={setFormData}
-          handleInputChange={handleInputChange}
-          handleSubmit={handleSubmit}
-          handleFileUpload={handleFileUpload}
-          exportOrders={exportOrders}
-          setSidebarOpen={setSidebarOpen}
-          productCatalog={productCatalog}
-          handleEdit={handleEdit}
-          handleDelete={handleDelete}
-          handleStatusChange={handleStatusChange}
-        />
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <div className="bg-white rounded-lg shadow p-6">
+            <div className="flex items-center">
+              <div className="flex-shrink-0">
+                <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
+                  <DocumentTextIcon className="w-4 h-4 text-white" />
+                </div>
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">Total Orders</p>
+                <p className="text-2xl font-bold text-gray-900">{data.length}</p>
+              </div>
+            </div>
+          </div>
+          
+          <div className="bg-white rounded-lg shadow p-6">
+            <div className="flex items-center">
+              <div className="flex-shrink-0">
+                <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
+                  <EyeIcon className="w-4 h-4 text-white" />
+                </div>
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">Completed</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {data.filter(order => order.status === 'completed').length}
+                </p>
+              </div>
+            </div>
+          </div>
+          
+          <div className="bg-white rounded-lg shadow p-6">
+            <div className="flex items-center">
+              <div className="flex-shrink-0">
+                <div className="w-8 h-8 bg-yellow-500 rounded-full flex items-center justify-center">
+                  <PencilIcon className="w-4 h-4 text-white" />
+                </div>
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">Pending</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {data.filter(order => order.status === 'pending').length}
+                </p>
+              </div>
+            </div>
+          </div>
+          
+          <div className="bg-white rounded-lg shadow p-6">
+            <div className="flex items-center">
+              <div className="flex-shrink-0">
+                <div className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center">
+                  <TrashIcon className="w-4 h-4 text-white" />
+                </div>
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">Cancelled</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {data.filter(order => order.status === 'cancelled').length}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
 
-        <TableSection
-          table={table}
-          orders={orders}
-          globalFilter={globalFilter}
-          setGlobalFilter={setGlobalFilter}
-          handleEdit={handleEdit}
-          handleDelete={handleDelete}
-          handleStatusChange={handleStatusChange}
-        />
+        {/* Table Container */}
+        <div className="bg-white rounded-lg shadow">
+          {/* Search and Controls */}
+          <div className="p-6 border-b border-gray-200">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-4 sm:space-y-0">
+              <div className="relative flex-1 max-w-md">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" />
+                </div>
+                <input
+                  type="text"
+                  placeholder="Search orders by customer, product, or phone..."
+                  value={globalFilter ?? ''}
+                  onChange={(e) => setGlobalFilter(e.target.value)}
+                  className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+              
+              <div className="flex space-x-3">
+                <select 
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                  className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                >
+                  <option value="">All Status</option>
+                  <option value="pending">Pending</option>
+                  <option value="completed">Completed</option>
+                  <option value="shipped">Shipped</option>
+                  <option value="cancelled">Cancelled</option>
+                </select>
+                
+                <button 
+                  onClick={handleExportCSV}
+                  className="bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-700 transition-colors flex items-center space-x-2"
+                >
+                  <PrinterIcon className="w-4 h-4" />
+                  <span>Export CSV</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Table */}
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                {table.getHeaderGroups().map((headerGroup) => (
+                  <tr key={headerGroup.id}>
+                    {headerGroup.headers.map((header) => (
+                      <th
+                        key={header.id}
+                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
+                        onClick={header.column.getToggleSortingHandler()}
+                      >
+                        <div className="flex items-center space-x-1">
+                          <span>
+                            {flexRender(
+                              header.column.columnDef.header,
+                              header.getContext()
+                            )}
+                          </span>
+                          {header.column.getIsSorted() && (
+                            <span>
+                              {header.column.getIsSorted() === 'desc' ? (
+                                <ChevronDownIcon className="w-4 h-4" />
+                              ) : (
+                                <ChevronUpIcon className="w-4 h-4" />
+                              )}
+                            </span>
+                          )}
+                        </div>
+                      </th>
+                    ))}
+                  </tr>
+                ))}
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {table.getRowModel().rows.map((row) => (
+                  <tr 
+                    key={row.id} 
+                    className={`hover:bg-gray-50 transition-colors ${
+                      editingOrder?.id === row.original.id ? 'bg-blue-50' : ''
+                    }`}
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <td key={cell.id} className="px-6 py-4 whitespace-nowrap text-sm">
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Pagination */}
+          <div className="px-6 py-4 border-t border-gray-200">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <span className="text-sm text-gray-700">
+                  Showing{' '}
+                  <span className="font-medium">
+                    {table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1}
+                  </span>{' '}
+                  to{' '}
+                  <span className="font-medium">
+                    {Math.min(
+                      (table.getState().pagination.pageIndex + 1) * table.getState().pagination.pageSize,
+                      filteredData.length
+                    )}
+                  </span>{' '}
+                  of <span className="font-medium">{filteredData.length}</span> results
+                </span>
+              </div>
+              
+              <div className="flex items-center space-x-2">
+                <button
+                  onClick={() => table.previousPage()}
+                  disabled={!table.getCanPreviousPage()}
+                  className="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  Previous
+                </button>
+                
+                <span className="text-sm text-gray-700">
+                  Page{' '}
+                  <span className="font-medium">
+                    {table.getState().pagination.pageIndex + 1}
+                  </span>{' '}
+                  of{' '}
+                  <span className="font-medium">
+                    {table.getPageCount()}
+                  </span>
+                </span>
+                
+                <button
+                  onClick={() => table.nextPage()}
+                  disabled={!table.getCanNextPage()}
+                  className="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-
-      {/* Overlay for mobile sidebar */}
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
     </div>
   );
-}
+};
 
 export default OrdersManagement;
