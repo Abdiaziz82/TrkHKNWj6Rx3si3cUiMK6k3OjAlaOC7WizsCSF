@@ -11,27 +11,15 @@ import DashboardHome from "./pages/customerdashboard/DashboardHome";
 import Orders from "./pages/customerdashboard/Orders";
 import Products from "./pages/customerdashboard/Products";
 import Profile from "./pages/customerdashboard/Profile";
-import InventoryManagement from "./pages/AdminDashboard/InventoryManagement";
 import AdminProtectedRoute from "./components/AdminDashboard/AdminProtectedRoute";
 import AdminLayout from "./components/AdminDashboard/AdminLayout";
 import AdminDashboardHome from "./pages/AdminDashboard/AdminDashboardHome";
+import UserManagement from "./pages/AdminDashboard/UserManagement";
 import AdminProfile from "./pages/AdminDashboard/AdminProfile";
-import OrdersManagement from "./pages/AdminDashboard/OrdersManagement";
-import LedgerPayments from "./pages/AdminDashboard/LedgerPayments";
-import RetailerProfiles from "./pages/AdminDashboard/RetailerProfiles";
-import AnalyticsForecasting from "./pages/AdminDashboard/AnalyticsForecasting";
-import DigitalMarketingTools from "./pages/AdminDashboard/DigitalMarketingTools";
-import Settings from "./pages/AdminDashboard/Settings";
-import Payments from "./pages/customerdashboard/Payments";
-import Messages from "./pages/customerdashboard/Messages";
-import Analytics from "./pages/customerdashboard/Analytics";
-import CustomerSettings from "./pages/customerdashboard/CustomerSettings";
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(null);
   const [loading, setLoading] = useState(true);
-
-
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -58,8 +46,6 @@ function App() {
     checkAuth();
   }, []);
 
- 
-
   // Show loading spinner while checking authentication
   if (loading) {
     return (
@@ -71,7 +57,6 @@ function App() {
       </div>
     );
   }
-
 
   return (
     <>
@@ -93,10 +78,9 @@ function App() {
           <Route path="orders" element={<Orders />} />
           <Route path="products" element={<Products />} />
           <Route path="profile" element={<Profile />} />
-          <Route path="payments" element={<Payments />} />
-          <Route path="messages" element={<Messages />} />
-          <Route path="analytics" element={<Analytics />} />
-          <Route path="customersettings" element={<CustomerSettings />} />
+          <Route path="messages" element={<div>Messages Page</div>} />
+          <Route path="analytics" element={<div>Analytics Page</div>} />
+          <Route path="settings" element={<div>Settings Page</div>} />
           <Route path="help" element={<div>Help Page</div>} />
         </Route>
 
@@ -104,24 +88,16 @@ function App() {
         <Route path="/admin-dashboard" element={
           <AdminProtectedRoute>
             <AdminLayout />
-
-           
           </AdminProtectedRoute>
-          
         }>
-
-         
           <Route index element={<AdminDashboardHome />} />
-          <Route path="inventory-management" element={<InventoryManagement />} />
-
+          <Route path="inventory-management" element={<UserManagement />} />
           <Route path="products" element={<div>Admin Products Page</div>} />
-          <Route path="orders-management" element={<OrdersManagement />} />
-           <Route path="ledger-payments" element={<LedgerPayments />} />
-           <Route path="retailer-profiles" element={<RetailerProfiles />} />
-          <Route path="analytics-forecasting" element={<AnalyticsForecasting />} />
-          <Route path="digital-marketing-tools" element={<DigitalMarketingTools />} />
+          <Route path="orders-management" element={<div>Admin Orders Page</div>} />
+          <Route path="analytics" element={<div>Admin Analytics Page</div>} />
+          <Route path="finance" element={<div>Finance Page</div>} />
           <Route path="profile" element={<AdminProfile />} />
-          <Route path="settings" element={<Settings />} />
+          <Route path="settings" element={<div>System Settings Page</div>} />
           <Route path="help" element={<div>Admin Help Page</div>} />
         </Route>
       </Routes>
