@@ -1,0 +1,37 @@
+{
+  "brand": "TrkWholesale",
+  "navbar": {
+    "login": "Login",
+    "register": "Register"
+  },
+  "home": {
+    "preheader": "Enterprise Grade",
+    "headline": {
+      "line1": "Source Smarter.",
+      "line2": "Scale Your Retail Empire."
+    },
+    "subheadline": "Access exclusive global inventory with unified payments and AI-driven procurement intelligence. The definitive platform for modern retailers.",
+    "valueProps": {
+      "global": "Global Supplier Network",
+      "ai": "Predictive Inventory AI",
+      "payments": "Escrow-Secured Payments"
+    },
+    "chatbotAria": "Open Concierge Support"
+  },
+   "chatbot": {
+    "header": {
+      "title": "Commerce Assistant",
+      "status": "Online"
+    },
+    "welcome": "Hello! I'm your wholesale commerce assistant. I can help you with inventory inquiries, order tracking, pricing information, and supplier connections. How can I assist your business today?",
+    "quickActions": {
+      "inventory": "Check Inventory",
+      "pricing": "Get Pricing",
+      "order": "Track Order",
+      "supplier": "Supplier Info"
+    },
+    "inputPlaceholder": "Type your business inquiry...",
+    "loading": "Processing your inquiry...",
+    "privacy": "Secure AI assistant • Enterprise-grade encryption"
+  }
+}

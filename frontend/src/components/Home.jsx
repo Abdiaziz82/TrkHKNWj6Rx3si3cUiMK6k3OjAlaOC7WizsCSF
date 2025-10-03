@@ -1,12 +1,13 @@
-// pages/Home.js (Updated)
 import React, { useState } from 'react';
 import { BsChatDotsFill } from 'react-icons/bs';
 import { FiArrowRight } from 'react-icons/fi';
 import { RiGlobalLine, RiShieldKeyholeLine, RiBrainLine } from 'react-icons/ri';
 import Chatbot from '../components/Chatbot';
+import { useTranslation } from 'react-i18next';
 
 const Home = () => {
   const [isChatbotOpen, setIsChatbotOpen] = useState(false);
+  const { t } = useTranslation();
 
   const handleChatbotToggle = () => {
     setIsChatbotOpen(!isChatbotOpen);
@@ -40,29 +41,29 @@ const Home = () => {
             {/* Pre-header Pill */}
             <div className="mb-6 inline-flex items-center rounded-full border border-indigo-400/30 bg-indigo-500/10 px-4 py-1.5 backdrop-blur-md">
               <span className="text-xs font-semibold uppercase tracking-wider text-indigo-200">
-                Enterprise Grade
+                {t("home.preheader")}
               </span>
             </div>
 
             {/* Main Headline */}
             <h1 className="mx-auto max-w-5xl text-5xl font-extrabold leading-[1.1] tracking-tighter text-white sm:text-6xl md:text-7xl lg:text-[5.5rem]">
-              Source Smarter.
+              {t("home.headline.line1")}
               <br />
               <span className="bg-gradient-to-r from-indigo-200 via-white to-indigo-200 bg-clip-text text-transparent">
-                Scale Your Retail Empire.
+                {t("home.headline.line2")}
               </span>
             </h1>
             
             {/* Subheadline */}
             <p className="mx-auto mt-8 max-w-3xl text-xl font-light leading-relaxed text-slate-300 md:text-2xl">
-              Access exclusive global inventory with unified payments and AI-driven procurement intelligence. The definitive platform for modern retailers.
+              {t("home.subheadline")}
             </p>
             
             {/* Value Props */}
             <div className="mt-12 flex flex-wrap justify-center gap-4 md:gap-8">
-              <GlassPill icon={RiGlobalLine} text="Global Supplier Network" />
-              <GlassPill icon={RiBrainLine} text="Predictive Inventory AI" />
-              <GlassPill icon={RiShieldKeyholeLine} text="Escrow-Secured Payments" />
+              <GlassPill icon={RiGlobalLine} text={t("home.valueProps.global")} />
+              <GlassPill icon={RiBrainLine} text={t("home.valueProps.ai")} />
+              <GlassPill icon={RiShieldKeyholeLine} text={t("home.valueProps.payments")} />
             </div>
 
           </div>
@@ -72,7 +73,7 @@ const Home = () => {
         <button
           onClick={handleChatbotToggle}
           className="fixed bottom-8 right-8 z-50 flex h-14 w-14 items-center justify-center rounded-full border border-white/10 bg-indigo-600/90 text-white shadow-lg shadow-indigo-900/50 backdrop-blur-md transition-all duration-300 hover:scale-110 hover:bg-indigo-500"
-          aria-label="Open Concierge Support"
+          aria-label={t("home.chatbotAria")}
         >
           <BsChatDotsFill className="h-6 w-6" />
           {/* Notification dot */}

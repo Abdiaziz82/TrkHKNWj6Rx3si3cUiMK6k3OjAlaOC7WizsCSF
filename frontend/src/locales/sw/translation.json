@@ -1,0 +1,37 @@
+{
+    "brand": "TrkWholesale",
+    "navbar": {
+        "login": "Ingia",
+        "register": "Jisajili"
+    },
+    "home": {
+        "preheader": "Daraja la Biashara",
+        "headline": {
+            "line1": "Nunua kwa Busara.",
+            "line2": "Kua na Biashara Yako ya Rejareja."
+        },
+        "subheadline": "Pata hesabu za kipekee za kimataifa kwa malipo yaliyoshikamana na akili ya bandia ya ununuzi. Jukwaa la mwisho kwa wafanyabiashara wa kisasa.",
+        "valueProps": {
+            "global": "Mtandao wa Wauzaji Ulimwenguni",
+            "ai": "AI ya Utabiri wa Hesabu",
+            "payments": "Malipo Yaliyo salama kwa Escrow"
+        },
+        "chatbotAria": "Fungua Msaada wa Concierge"
+    },
+    "chatbot": {
+        "header": {
+            "title": "Msaidizi wa Biashara",
+            "status": "Mtandaoni"
+        },
+        "welcome": "Habari! Mimi ni msaidizi wako wa biashara ya jumla. Naweza kukusaidia na maswali ya hesabu, ufuatiliaji wa oda, taarifa za bei, na muunganiko na wasambazaji. Naweza kukusaidia vipi leo?",
+        "quickActions": {
+            "inventory": "Angalia Hesabu",
+            "pricing": "Pata Bei",
+            "order": "Fuatilia Oda",
+            "supplier": "Habari za Wasambazaji"
+        },
+        "inputPlaceholder": "Andika swali lako la biashara...",
+        "loading": "Ninashughulikia ombi lako...",
+        "privacy": "Msaidizi salama wa AI • Usimbaji wa kiwango cha biashara"
+    }
+}
