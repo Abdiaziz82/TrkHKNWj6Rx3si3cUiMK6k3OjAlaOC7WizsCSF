@@ -38,7 +38,14 @@ const Login = () => {
 
       if (response.data.success) {
         localStorage.setItem('user', JSON.stringify(response.data.user));
-        window.location.href = '/customer-dashboard';
+
+        if (response.data.user.role === 'customer') {
+          window.location.href = '/customer-dashboard';
+        } else if (response.data.user.role === 'admin') {
+          window.location.href = '/admin-dashboard';
+        } else {
+          window.location.href = '/dashboard';
+        }
       }
     } catch (err) {
       setError(err.response?.data?.message || 'Login failed. Please try again.');
@@ -48,7 +55,7 @@ const Login = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 via-white to-amber-50/30 flex items-center justify-center p-4 relative overflow-hidden">
-      
+
       {/* Background Elements */}
       <div className="absolute inset-0 overflow-hidden">
         {/* Subtle Grid */}
@@ -59,7 +66,7 @@ const Login = () => {
             backgroundSize: '40px 40px'
           }} />
         </div>
-        
+
         {/* Floating Shapes */}
         <div className="absolute top-20 left-10 w-20 h-20 bg-amber-200/30 rounded-full blur-xl" />
         <div className="absolute bottom-20 right-10 w-32 h-32 bg-amber-200/20 rounded-full blur-xl" />
@@ -68,7 +75,7 @@ const Login = () => {
 
       {/* Main Container */}
       <div className="relative w-full max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-        
+
         {/* Left Section - Brand & Value Proposition */}
         <div className="flex flex-col justify-center p-6 lg:p-8">
           <div className="space-y-8">
@@ -83,14 +90,14 @@ const Login = () => {
                   <p className="text-amber-700/80 text-sm">Business Intelligence</p>
                 </div>
               </div>
-              
+
               {/* Value Proposition */}
               <div className="space-y-6">
                 <h1 className="text-4xl lg:text-5xl font-bold text-gray-800 leading-tight">
                   Your AI<br />
                   <span className="text-amber-700 opacity-70">Bookkeeper.</span>
                 </h1>
-                
+
                 <div className="space-y-4">
                   <div className="flex items-center gap-4 p-4 bg-white/60 rounded-xl border border-amber-100 backdrop-blur-sm">
                     <div className="w-12 h-12 bg-amber-100 rounded-lg flex items-center justify-center">
@@ -101,7 +108,7 @@ const Login = () => {
                       <p className="text-gray-600 text-sm">Track and manage your stock effortlessly</p>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-center gap-4 p-4 bg-white/60 rounded-xl border border-amber-100 backdrop-blur-sm">
                     <div className="w-12 h-12 bg-amber-100 rounded-lg flex items-center justify-center">
                       <FiDollarSign className="w-6 h-6 text-amber-700" />
@@ -132,7 +139,7 @@ const Login = () => {
         {/* Right Section - Login Form */}
         <div className="flex items-center justify-center p-6 lg:p-8">
           <div className="w-full max-w-md bg-white rounded-2xl p-8 shadow-xl border border-amber-100">
-            
+
             {/* Form Header */}
             <div className="text-center mb-8">
               <h2 className="text-2xl font-bold text-gray-800 mb-2">Welcome Back</h2>
@@ -148,7 +155,7 @@ const Login = () => {
 
             {/* Login Form */}
             <form onSubmit={handleSubmit} className="space-y-6">
-              
+
               {/* Email Field */}
               <div className="space-y-2">
                 <label htmlFor="email" className="block text-sm font-medium text-gray-700">
@@ -239,8 +246,8 @@ const Login = () => {
             <div className="text-center pt-6 mt-6 border-t border-gray-200">
               <p className="text-gray-600 text-sm">
                 Don't have an account?{' '}
-                <Link 
-                  to="/register" 
+                <Link
+                  to="/register"
                   className="font-semibold text-amber-600 hover:text-amber-700 transition-colors duration-200"
                 >
                   Get started
