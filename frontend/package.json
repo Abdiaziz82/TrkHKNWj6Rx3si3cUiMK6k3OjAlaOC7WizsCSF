@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.14",
+    "@tanstack/react-table": "^8.21.3",
     "axios": "^1.12.2",
     "framer-motion": "^12.23.22",
     "i18next": "^25.5.3",
