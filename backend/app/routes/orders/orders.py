@@ -6,7 +6,7 @@ from app.models.User import User
 from app.services.mpesa_service import MpesaService
 import jwt
 from functools import wraps
-from datetime import datetime
+from datetime import datetime , timedelta
 from decimal import Decimal
 
 orders_bp = Blueprint("orders", __name__)
@@ -347,4 +347,106 @@ def update_order(current_user, order_id):
     except Exception as e:
         db.session.rollback()
         print(f"Error updating order: {str(e)}")
+        return jsonify({"success": False, "message": str(e)}), 500
+    
+@orders_bp.route("/dashboard", methods=["GET"])
+@token_required
+def get_dashboard_data(current_user):
+    try:
+        # Get user's orders
+        user_orders = Order.query.filter_by(customer_id=current_user.id).all()
+        
+        # Calculate stats
+        total_orders = len(user_orders)
+        active_orders = len([o for o in user_orders if o.status in ['pending', 'processing', 'shipped']])
+        active_deliveries = len([o for o in user_orders if o.status == 'shipped'])
+        
+        # Calculate orders this week and month
+        today = datetime.utcnow().date()
+        week_ago = today - timedelta(days=7)
+        month_ago = today - timedelta(days=30)
+        
+        new_orders_this_week = len([o for o in user_orders if o.created_at.date() >= week_ago])
+        orders_this_month = len([o for o in user_orders if o.created_at.date() >= month_ago])
+        
+        # Calculate deliveries today
+        deliveries_today = len([o for o in user_orders if o.status == 'shipped' and o.created_at.date() == today])
+        
+        # Calculate loyalty points (1 point per 100 KSH spent)
+        total_spent = sum([float(o.total_amount) for o in user_orders if o.status == 'delivered'])
+        loyalty_points = int(total_spent / 100)
+        points_this_month = int(sum([float(o.total_amount) for o in user_orders 
+                                   if o.status == 'delivered' and o.created_at.date() >= month_ago]) / 100)
+        
+        # Get recent orders (last 5)
+        recent_orders = user_orders[:5]
+        
+        # Get user's ordered product categories
+        ordered_categories = set()
+        for order in user_orders:
+            for item in order.items:
+                if item.product and item.product.category:
+                    ordered_categories.add(item.product.category)
+        
+        # Get recommended products (products from same categories user ordered)
+        recommended_products = []
+        if ordered_categories:
+            recommended_products = Product.query.filter(
+                Product.category.in_(list(ordered_categories))
+            ).limit(4).all()
+        
+        # Get new arrivals (last 5 products added)
+        new_arrivals = Product.query.order_by(Product.created_at.desc()).limit(5).all()
+        
+        # Current offers (you can make these dynamic based on business logic)
+        current_offers = [
+            {
+                "title": "Bulk Order Discount",
+                "description": "Save 15% on orders over 5000 KSH",
+                "validUntil": "2024-12-31",
+                "code": "BULK15",
+                "type": "discount"
+            },
+            {
+                "title": "Free Shipping",
+                "description": "Free delivery on all orders this month",
+                "validUntil": "2024-11-30",
+                "code": "FREESHIP",
+                "type": "shipping"
+            },
+            {
+                "title": "Loyalty Bonus",
+                "description": f"Earn {loyalty_points} points on your next order",
+                "validUntil": "2024-11-15",
+                "code": "LOYALTY",
+                "type": "loyalty"
+            }
+        ]
+        
+        # Prepare response data
+        dashboard_data = {
+            "stats": {
+                "totalOrders": total_orders,
+                "activeOrders": active_orders,
+                "activeDeliveries": active_deliveries,
+                "newOrdersThisWeek": new_orders_this_week,
+                "ordersThisMonth": orders_this_month,
+                "deliveriesToday": deliveries_today,
+                "loyaltyPoints": loyalty_points,
+                "pointsThisMonth": points_this_month,
+                "totalSpent": total_spent
+            },
+            "recentOrders": [order.to_dict() for order in recent_orders],
+            "recommendedProducts": [product.to_dict() for product in recommended_products],
+            "newArrivals": [product.to_dict() for product in new_arrivals],
+            "currentOffers": current_offers
+        }
+        
+        return jsonify({
+            "success": True,
+            "data": dashboard_data
+        }), 200
+
+    except Exception as e:
+        print(f"Error fetching dashboard data: {str(e)}")
         return jsonify({"success": False, "message": str(e)}), 500
