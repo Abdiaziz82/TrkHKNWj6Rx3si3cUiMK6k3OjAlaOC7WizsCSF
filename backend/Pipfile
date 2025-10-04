@@ -15,6 +15,7 @@ flask-mail = "*"
 pandas = "*"
 openpyxl = "*"
 xlrd = "*"
+requests = "*"
 
 [dev-packages]
 

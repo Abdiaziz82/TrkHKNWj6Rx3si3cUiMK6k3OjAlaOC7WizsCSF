@@ -41,7 +41,9 @@ def create_app():
     from app.routes.auth.register import register_bp
     from app.routes.auth.login import login_bp
     from app.routes.products.product import products_bp  # Correct import path
+    from app.routes.orders import orders_bp
     
+    app.register_blueprint(orders_bp, url_prefix='/api')
     app.register_blueprint(register_bp, url_prefix='/api/auth')
     app.register_blueprint(login_bp, url_prefix='/api/auth')
     app.register_blueprint(products_bp, url_prefix='/api')  # This will make routes: /api/products
