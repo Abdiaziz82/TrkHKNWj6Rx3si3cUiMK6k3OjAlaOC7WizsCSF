@@ -71,15 +71,16 @@ const AdminSidebar = ({ isOpen, toggleSidebar }) => {
       `}>
         {/* Header */}
         <div className="flex-shrink-0 px-6 py-4 border-b border-gray-200">
-          <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-gray-900 rounded flex items-center justify-center">
-              <span className="text-white font-semibold text-sm">WF</span>
-            </div>
-            <div>
-              <h1 className="text-base font-semibold text-gray-900">WholesalerFlow</h1>
-              <p className="text-xs text-gray-500">Enterprise Platform</p>
-            </div>
-          </div>
+ <div className="flex items-center space-x-3">
+    <div className="w-10 h-10 bg-gradient-to-br from-purple-600 to-blue-600 rounded-lg flex items-center justify-center shadow-md">
+      <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+      </svg>
+    </div>
+    <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent tracking-tight">
+      SmartERP
+    </h1>
+  </div>
           
           {/* Close button for mobile */}
           <button 
