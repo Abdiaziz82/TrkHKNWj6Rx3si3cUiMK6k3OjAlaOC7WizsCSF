@@ -15,20 +15,22 @@ const Header = () => {
     <header className="bg-white shadow-lg border-b border-gray-200 sticky top-0 z-50 backdrop-blur-sm bg-white/95">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
-          {/* Logo */}
-          <Link 
-            to="/" 
-            className="flex-shrink-0 transition-transform duration-200 hover:scale-105"
-          >
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-lg flex items-center justify-center shadow-md">
-                <span className="text-white font-bold text-lg">L</span>
-              </div>
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-700 bg-clip-text text-transparent tracking-tight">
-                {t("brand")}
-              </h1>
-            </div>
-          </Link>
+          {/* Logo - Warehouse Inspired */}
+         <Link 
+  to="/" 
+  className="flex-shrink-0 transition-transform duration-200 hover:scale-105"
+>
+  <div className="flex items-center space-x-3">
+    <div className="w-10 h-10 bg-gradient-to-br from-purple-600 to-blue-600 rounded-lg flex items-center justify-center shadow-md">
+      <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+      </svg>
+    </div>
+    <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent tracking-tight">
+      SmartERP
+    </h1>
+  </div>
+</Link>
 
           {/* Navigation Buttons */}
           <div className="flex items-center space-x-4">
