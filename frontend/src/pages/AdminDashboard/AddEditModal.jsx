@@ -67,7 +67,7 @@ const AddEditModal = ({
     // Create FormData to handle file upload
     const formData = new FormData();
     
-    // Append all product data
+    // Append all product data including category
     Object.keys(newItem).forEach(key => {
       if (key !== 'image_url' && key !== 'image_filename') {
         formData.append(key, newItem[key]);
@@ -99,6 +99,13 @@ const AddEditModal = ({
       [name]: value
     }));
   };
+
+  // Common categories for suggestions
+  const categoryOptions = [
+    'Electronics', 'Clothing', 'Food & Beverages', 'Home & Garden', 
+    'Sports & Outdoors', 'Books & Media', 'Health & Beauty', 'Toys & Games',
+    'Automotive', 'Office Supplies', 'Jewelry', 'Furniture', 'Pet Supplies'
+  ];
 
   if (!isOpen) return null;
 
@@ -193,6 +200,27 @@ const AddEditModal = ({
                 placeholder="Enter SKU"
                 required
               />
+            </div>
+
+            {/* Category */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Category
+              </label>
+              <input
+                type="text"
+                name="category"
+                value={newItem.category || ''}
+                onChange={handleInputChange}
+                list="categoryOptions"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Enter category"
+              />
+              <datalist id="categoryOptions">
+                {categoryOptions.map((category, index) => (
+                  <option key={index} value={category} />
+                ))}
+              </datalist>
             </div>
 
             {/* Unit */}
