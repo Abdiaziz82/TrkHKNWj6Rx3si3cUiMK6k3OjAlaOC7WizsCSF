@@ -85,10 +85,7 @@ const Login = () => {
                 <div className="w-14 h-14 bg-gradient-to-br from-blue-600 to-blue-700 flex items-center justify-center rounded-2xl shadow-lg">
                   <FiBook className="w-7 h-7 text-white" />
                 </div>
-                <div>
-                  <h1 className="text-2xl font-bold text-gray-900">LedgerAI</h1>
-                  <p className="text-blue-600/80 text-sm">Business Intelligence</p>
-                </div>
+                
               </div>
 
               {/* Value Proposition */}
