@@ -37,7 +37,7 @@ const AI_KNOWLEDGE_BASE = {
         // Uwekezaji na Fedha
         "mikakati ya uwekezaji kwa wanaoanza": "Kwa wanaoanza, napendekeza kuanza na portfolio iliyotawanywa ikijumuisha fedha za fahirisi (60%), dhamana (20%), na kuweka pesa taslimu (20%). Fikiria ETF zenye gharama ndogo na uwekezaji wa mara kwa mara kupunguza hatari.",
         "mikakati bora ya uwekezaji": "Mikakati bora inategemea uvumilivu wako wa hatari na malengo. Kwa ukuaji wa muda mrefu: fedha za fahirisi za soko la hisa. Kwa utulivu: dhamana na mali isiyohamika. Kwa hatari kubwa/malipo makubwa: hisa za mtu binafsi na crypto (sehemu ndogo tu).",
-        "jinsi ya kuokoa pesa kila mwezi": "Fuatilia matumizi yako, unda bajeti ukitumia kanuni ya 50/30/20 (50% mahitaji, 30% matamanio, 20% akiba), weka akiba kiotomatiki, punguza huduma za usajili, na kupikia nyumbani zaidi.",
+        "jinsi ya kuokoa pesa kila mwezi": "Fuatilia matumizi yako, unda bajeti ukitumia kanuni ya 50/30/20 (50% mahitaji, 30% matamanio, 20% akiba), weke akiba kiotomatiki, punguza huduma za usajili, na kupikia nyumbani zaidi.",
         "mkakati wa kupanga kustaafu": "Anza mapema, changia kwenye akaunti za kustaafu (401k/IRA), lenga kuokoa 15% ya mapato, tofautisha uwekezaji, na ongeza michango pamoja na nyongeza ya mshahara. Fikiria fedha za tarehu lengwa kwa njia isiyohitaji usimamizi mwingi.",
         "utofautishaji wa portfoli": "Utofautishaji unamaanisha kueneza uwekezaji kwenye mali tofauti (hisa, dhamana, mali isiyohamika, bidhaa) kupunguza hatari. Kanuni nzuri: 100 toa umri wako = % kwenye hisa, iliyobaki kwenye dhamana.",
         "ni nini uwekezaji wa mara kwa mara": "Kuwekeza kiasi kilichowekwa mara kwa mara bila kujali hali ya soko. Hii inapunguza athari za kutopangika na kuepuka kujaribu kupanga soko.",
@@ -64,9 +64,9 @@ const DebugModeInterface = ({ isOpen, onClose, conversations, currentUser, socke
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center p-4">
-            <div className="bg-gray-900 rounded-2xl p-6 max-w-2xl w-full max-h-[80vh] overflow-y-auto border-2 border-yellow-500">
+            <div className="bg-gray-900 rounded-2xl p-6 max-w-2xl w-full max-h-[80vh] overflow-y-auto border-2 border-blue-500">
                 <div className="flex items-center justify-between mb-6">
-                    <h3 className="text-2xl font-bold text-yellow-500 flex items-center">
+                    <h3 className="text-2xl font-bold text-blue-500 flex items-center">
                         <Cpu className="w-6 h-6 mr-2" />
                         Debug Mode
                     </h3>
@@ -172,7 +172,7 @@ const AIKnowledgeBrowser = ({ isOpen, onClose, language, onQuestionSelect }) => 
                 <div className="border-b border-gray-200 p-6">
                     <div className="flex items-center justify-between mb-4">
                         <h3 className="text-2xl font-bold text-gray-900 flex items-center">
-                            <Book className="w-6 h-6 mr-3 text-purple-600" />
+                            <Book className="w-6 h-6 mr-3 text-blue-600" />
                             AI Knowledge Base
                         </h3>
                         <button
@@ -191,14 +191,14 @@ const AIKnowledgeBrowser = ({ isOpen, onClose, language, onQuestionSelect }) => 
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                                 placeholder="Search AI knowledge..."
-                                className="w-full pl-10 pr-4 py-3 bg-gray-100 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                className="w-full pl-10 pr-4 py-3 bg-gray-100 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             />
                         </div>
                         
                         <select
                             value={selectedCategory}
                             onChange={(e) => setSelectedCategory(e.target.value)}
-                            className="px-4 py-3 bg-gray-100 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                            className="px-4 py-3 bg-gray-100 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         >
                             {Object.entries(categories).map(([value, label]) => (
                                 <option key={value} value={value}>{label}</option>
@@ -210,7 +210,7 @@ const AIKnowledgeBrowser = ({ isOpen, onClose, language, onQuestionSelect }) => 
                 <div className="flex-1 overflow-y-auto p-6">
                     <div className="grid gap-4">
                         {filteredQuestions.map(([question, answer]) => (
-                            <div key={question} className="border border-gray-200 rounded-xl p-4 hover:border-purple-300 hover:bg-purple-50 transition-all">
+                            <div key={question} className="border border-gray-200 rounded-xl p-4 hover:border-blue-300 hover:bg-blue-50 transition-all">
                                 <h4 className="font-semibold text-gray-900 mb-2 text-lg">{question}</h4>
                                 <p className="text-gray-600 mb-3 leading-relaxed">{answer}</p>
                                 <button
@@ -218,7 +218,7 @@ const AIKnowledgeBrowser = ({ isOpen, onClose, language, onQuestionSelect }) => 
                                         onQuestionSelect(question);
                                         onClose();
                                     }}
-                                    className="text-purple-600 hover:text-purple-700 font-medium text-sm flex items-center"
+                                    className="text-blue-600 hover:text-blue-700 font-medium text-sm flex items-center"
                                 >
                                     <Send className="w-4 h-4 mr-1" />
                                     Use this question
@@ -403,7 +403,7 @@ const Messages = () => {
             <div className="fixed inset-0 bg-black z-50 flex flex-col items-center justify-center">
                 {/* Call Header */}
                 <div className="text-center mb-8">
-                    <div className="w-20 h-20 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center text-white font-semibold text-2xl mx-auto mb-4">
+                    <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white font-semibold text-2xl mx-auto mb-4">
                         {contactName?.charAt(0) || 'U'}
                     </div>
                     <h2 className="text-2xl font-bold text-white mb-2">{contactName}</h2>
@@ -482,7 +482,7 @@ const Messages = () => {
                             </button>
                             <button
                                 onClick={handleAcceptCall}
-                                className="p-4 bg-green-500 rounded-full text-white hover:bg-green-600 transition-colors"
+                                className="p-4 bg-blue-500 rounded-full text-white hover:bg-blue-600 transition-colors"
                             >
                                 <Phone className="w-6 h-6" />
                             </button>
@@ -511,12 +511,12 @@ const Messages = () => {
                     style={{ left: position.x, top: position.y }}
                 >
                     <button className="w-full px-4 py-3 text-left text-sm text-gray-700 hover:bg-gray-50 transition-colors flex items-center space-x-3">
-                        <UserPlus className="w-4 h-4 text-green-500" />
+                        <UserPlus className="w-4 h-4 text-blue-500" />
                         <span>Add to contacts</span>
                     </button>
                     
                     <button className="w-full px-4 py-3 text-left text-sm text-gray-700 hover:bg-gray-50 transition-colors flex items-center space-x-3">
-                        <Mail className="w-4 h-4 text-green-500" />
+                        <Mail className="w-4 h-4 text-blue-500" />
                         <span>Export chat</span>
                     </button>
 
@@ -524,9 +524,9 @@ const Messages = () => {
 
                     <button 
                         onClick={() => setShowDebugMode(true)}
-                        className="w-full px-4 py-3 text-left text-sm text-gray-700 hover:bg-purple-50 transition-colors flex items-center space-x-3"
+                        className="w-full px-4 py-3 text-left text-sm text-gray-700 hover:bg-blue-50 transition-colors flex items-center space-x-3"
                     >
-                        <Cpu className="w-4 h-4 text-purple-500" />
+                        <Cpu className="w-4 h-4 text-blue-500" />
                         <span>Developer Settings</span>
                     </button>
                 </div>
@@ -887,7 +887,7 @@ const Messages = () => {
                             </button>
                             <button
                                 onClick={() => setShowRetailers(true)}
-                                className="p-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                                className="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                             >
                                 <UserPlus className="w-5 h-5" />
                             </button>
@@ -902,7 +902,7 @@ const Messages = () => {
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                             placeholder="Search conversations..."
-                            className="w-full pl-10 pr-4 py-3 bg-gray-100 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
+                            className="w-full pl-10 pr-4 py-3 bg-gray-100 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                         />
                     </div>
                 </div>
@@ -913,16 +913,16 @@ const Messages = () => {
                         <div
                             key={conversation.id}
                             onClick={() => fetchConversation(conversation.id)}
-                            className={`p-4 border-b border-gray-100 cursor-pointer transition-all hover:bg-white ${selectedConversation?.id === conversation.id ? 'bg-white border-green-500 border-r-2' : ''
+                            className={`p-4 border-b border-gray-100 cursor-pointer transition-all hover:bg-white ${selectedConversation?.id === conversation.id ? 'bg-white border-blue-500 border-r-2' : ''
                                 }`}
                         >
                             <div className="flex items-start space-x-3">
                                 <div className="relative">
-                                    <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center text-white font-semibold text-sm">
+                                    <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center text-white font-semibold text-sm">
                                         {conversation.avatar}
                                     </div>
                                     {conversation.online && (
-                                        <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-400 border-2 border-white rounded-full"></div>
+                                        <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-blue-400 border-2 border-white rounded-full"></div>
                                     )}
                                 </div>
 
@@ -944,13 +944,13 @@ const Messages = () => {
 
                                     <div className="flex items-center justify-between">
                                         <span className={`text-xs px-2 py-1 rounded-full ${conversation.online
-                                                ? 'bg-green-100 text-green-800'
+                                                ? 'bg-blue-100 text-blue-800'
                                                 : 'bg-gray-100 text-gray-600'
                                             }`}>
                                             {conversation.online ? 'Online' : 'Offline'}
                                         </span>
                                         {conversation.unread_count > 0 && (
-                                            <span className="bg-green-500 text-white text-xs rounded-full px-2 py-1 min-w-6 text-center">
+                                            <span className="bg-blue-500 text-white text-xs rounded-full px-2 py-1 min-w-6 text-center">
                                                 {conversation.unread_count}
                                             </span>
                                         )}
@@ -976,11 +976,11 @@ const Messages = () => {
                             </button>
 
                             <div className="relative">
-                                <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center text-white font-semibold">
+                                <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center text-white font-semibold">
                                     {selectedConversation.avatar}
                                 </div>
                                 {selectedConversation.online && (
-                                    <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-400 border-2 border-white rounded-full"></div>
+                                    <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-blue-400 border-2 border-white rounded-full"></div>
                                 )}
                             </div>
 
@@ -989,11 +989,11 @@ const Messages = () => {
                                     {selectedConversation.participant_name}
                                 </h2>
                                 <p className="text-sm text-gray-600 flex items-center">
-                                    <span className={`w-2 h-2 rounded-full mr-2 ${selectedConversation.online ? 'bg-green-400' : 'bg-gray-400'
+                                    <span className={`w-2 h-2 rounded-full mr-2 ${selectedConversation.online ? 'bg-blue-400' : 'bg-gray-400'
                                         }`}></span>
                                     {selectedConversation.online ? 'Online' : 'Offline'}
                                     {typingUsers.length > 0 && (
-                                        <span className="ml-2 text-green-600 italic">
+                                        <span className="ml-2 text-blue-600 italic">
                                             typing...
                                         </span>
                                     )}
@@ -1014,7 +1014,7 @@ const Messages = () => {
                                     </button>
                                     <button
                                         onClick={() => setShowAIFeatures(!showAIFeatures)}
-                                        className="p-3 text-purple-600 hover:text-purple-700 hover:bg-purple-50 rounded-xl transition-colors"
+                                        className="p-3 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-xl transition-colors"
                                         title="AI Support"
                                     >
                                         <Bot className="w-5 h-5" />
@@ -1031,19 +1031,19 @@ const Messages = () => {
                             )}
                             <button 
                                 onClick={handleVoiceCall}
-                                className="p-3 text-gray-600 hover:text-green-600 hover:bg-green-50 rounded-xl transition-colors"
+                                className="p-3 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-colors"
                             >
                                 <Phone className="w-5 h-5" />
                             </button>
                             <button 
                                 onClick={handleVideoCall}
-                                className="p-3 text-gray-600 hover:text-green-600 hover:bg-green-50 rounded-xl transition-colors"
+                                className="p-3 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-colors"
                             >
                                 <Video className="w-5 h-5" />
                             </button>
                             <button 
                                 onClick={handleMoreOptionsClick}
-                                className="p-3 text-gray-600 hover:text-green-600 hover:bg-green-50 rounded-xl transition-colors"
+                                className="p-3 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-colors"
                             >
                                 <MoreVertical className="w-5 h-5" />
                             </button>
@@ -1052,10 +1052,10 @@ const Messages = () => {
 
                     {/* AI Features Panel */}
                     {showAIFeatures && currentUser?.type === 'customer' && (
-                        <div className="bg-gradient-to-r from-blue-50 to-purple-50 border-b border-gray-200 p-4">
+                        <div className="bg-gradient-to-r from-blue-50 to-blue-100 border-b border-gray-200 p-4">
                             <div className="flex items-center justify-between mb-3">
                                 <h3 className="font-semibold text-gray-900 flex items-center">
-                                    <Bot className="w-4 h-4 mr-2 text-purple-600" />
+                                    <Bot className="w-4 h-4 mr-2 text-blue-600" />
                                     AI Finance & Booking Assistant
                                 </h3>
                                 <div className="flex items-center space-x-2">
@@ -1064,7 +1064,7 @@ const Messages = () => {
                                     </span>
                                     <button
                                         onClick={() => setShowAIKnowledge(true)}
-                                        className="text-xs text-purple-600 hover:text-purple-700 font-medium"
+                                        className="text-xs text-blue-600 hover:text-blue-700 font-medium"
                                     >
                                         Browse All
                                     </button>
@@ -1100,9 +1100,9 @@ const Messages = () => {
                                     >
                                         <div
                                             className={`max-w-lg px-4 py-3 rounded-2xl ${message.sender_id === currentUser?.id
-                                                    ? 'bg-green-500 text-white rounded-br-md'
+                                                    ? 'bg-blue-500 text-white rounded-br-md'
                                                     : message.sender_type === 'ai'
-                                                        ? 'bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-bl-md border-l-4 border-purple-400'
+                                                        ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-bl-md border-l-4 border-blue-400'
                                                         : 'bg-white text-gray-900 rounded-bl-md shadow-sm border border-gray-200'
                                                 }`}
                                         >
@@ -1113,8 +1113,8 @@ const Messages = () => {
                                                 </div>
                                             )}
                                             <p className="text-sm leading-relaxed">{message.content}</p>
-                                            <div className={`flex items-center justify-end space-x-1 mt-2 ${message.sender_id === currentUser?.id ? 'text-green-200' :
-                                                    message.sender_type === 'ai' ? 'text-purple-200' : 'text-gray-500'
+                                            <div className={`flex items-center justify-end space-x-1 mt-2 ${message.sender_id === currentUser?.id ? 'text-blue-200' :
+                                                    message.sender_type === 'ai' ? 'text-blue-200' : 'text-gray-500'
                                                 }`}>
                                                 <span className="text-xs">
                                                     {new Date(message.timestamp).toLocaleTimeString([], {
@@ -1129,16 +1129,16 @@ const Messages = () => {
 
                                 {aiThinking && (
                                     <div className="flex justify-start">
-                                        <div className="max-w-lg px-4 py-3 rounded-2xl bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-bl-md border-l-4 border-purple-400">
+                                        <div className="max-w-lg px-4 py-3 rounded-2xl bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-bl-md border-l-4 border-blue-400">
                                             <div className="flex items-center mb-2">
                                                 <Bot className="w-4 h-4 mr-2" />
                                                 <span className="text-xs font-semibold">AI Assistant</span>
                                             </div>
                                             <div className="flex items-center space-x-2">
                                                 <div className="flex space-x-1">
-                                                    <div className="w-2 h-2 bg-purple-200 rounded-full animate-bounce"></div>
-                                                    <div className="w-2 h-2 bg-purple-200 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                                                    <div className="w-2 h-2 bg-purple-200 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                                                    <div className="w-2 h-2 bg-blue-200 rounded-full animate-bounce"></div>
+                                                    <div className="w-2 h-2 bg-blue-200 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                                                    <div className="w-2 h-2 bg-blue-200 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
                                                 </div>
                                                 <p className="text-sm">Thinking...</p>
                                             </div>
@@ -1157,13 +1157,13 @@ const Messages = () => {
                             <div className="flex items-center space-x-1">
                                 <button
                                     onClick={() => setShowAttachmentMenu(!showAttachmentMenu)}
-                                    className="p-3 text-gray-500 hover:text-green-600 hover:bg-green-50 rounded-xl transition-colors"
+                                    className="p-3 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-colors"
                                 >
                                     <Paperclip className="w-5 h-5" />
                                 </button>
                                 <button
                                     onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-                                    className="p-3 text-gray-500 hover:text-green-600 hover:bg-green-50 rounded-xl transition-colors"
+                                    className="p-3 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-colors"
                                 >
                                     <Smile className="w-5 h-5" />
                                 </button>
@@ -1176,18 +1176,18 @@ const Messages = () => {
                                     onKeyDown={handleKeyPress}
                                     placeholder={language === 'english' ? "Type your message..." : "Andika ujumbe wako..."}
                                     rows="1"
-                                    className="w-full px-4 py-3 bg-gray-100 border border-gray-200 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
+                                    className="w-full px-4 py-3 bg-gray-100 border border-gray-200 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                                 />
 
                                 {/* Attachment Menu */}
                                 {showAttachmentMenu && (
                                     <div className="absolute bottom-16 left-0 bg-white rounded-xl shadow-lg border border-gray-200 py-2 z-10 min-w-48">
                                         <button className="w-full px-4 py-3 text-left text-sm text-gray-700 hover:bg-gray-50 transition-colors flex items-center space-x-3">
-                                            <Image className="w-4 h-4 text-green-500" />
+                                            <Image className="w-4 h-4 text-blue-500" />
                                             <span>Photo & Video</span>
                                         </button>
                                         <button className="w-full px-4 py-3 text-left text-sm text-gray-700 hover:bg-gray-50 transition-colors flex items-center space-x-3">
-                                            <File className="w-4 h-4 text-green-500" />
+                                            <File className="w-4 h-4 text-blue-500" />
                                             <span>Document</span>
                                         </button>
                                     </div>
@@ -1213,7 +1213,7 @@ const Messages = () => {
                                 onClick={sendMessage}
                                 disabled={!newMessage.trim()}
                                 className={`p-3 rounded-xl transition-all ${newMessage.trim()
-                                        ? 'bg-green-500 text-white hover:bg-green-600 shadow-md hover:shadow-lg'
+                                        ? 'bg-blue-500 text-white hover:bg-blue-600 shadow-md hover:shadow-lg'
                                         : 'bg-gray-100 text-gray-400 cursor-not-allowed'
                                     }`}
                             >
@@ -1226,8 +1226,8 @@ const Messages = () => {
                 // Empty State
                 <div className="flex-1 hidden md:flex items-center justify-center bg-gray-50">
                     <div className="text-center max-w-md">
-                        <div className="w-24 h-24 bg-gradient-to-br from-green-100 to-green-200 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                            <MessageCircle className="w-12 h-12 text-green-500" />
+                        <div className="w-24 h-24 bg-gradient-to-br from-blue-100 to-blue-200 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                            <MessageCircle className="w-12 h-12 text-blue-500" />
                         </div>
                         <h3 className="text-2xl font-bold text-gray-900 mb-3">Your Messages</h3>
                         <p className="text-gray-600 mb-6 leading-relaxed">
@@ -1236,7 +1236,7 @@ const Messages = () => {
                         </p>
                         <button
                             onClick={() => setShowRetailers(true)}
-                            className="bg-green-500 text-white px-6 py-3 rounded-xl hover:bg-green-600 transition-colors font-medium shadow-md hover:shadow-lg"
+                            className="bg-blue-500 text-white px-6 py-3 rounded-xl hover:bg-blue-600 transition-colors font-medium shadow-md hover:shadow-lg"
                         >
                             Start New Conversation
                         </button>
@@ -1304,28 +1304,28 @@ const Messages = () => {
                                     <button
                                         key={retailer.id}
                                         onClick={() => startNewConversation(retailer)}
-                                        className="w-full p-4 text-left rounded-xl border border-gray-200 hover:border-green-500 hover:bg-green-50 transition-all duration-200"
+                                        className="w-full p-4 text-left rounded-xl border border-gray-200 hover:border-blue-500 hover:bg-blue-50 transition-all duration-200"
                                     >
                                         <div className="flex items-center space-x-4">
                                             <div className="relative">
-                                                <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center text-white font-semibold">
+                                                <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center text-white font-semibold">
                                                     {retailer.avatar}
                                                 </div>
                                                 {retailer.online && (
-                                                    <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-400 border-2 border-white rounded-full"></div>
+                                                    <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-blue-400 border-2 border-white rounded-full"></div>
                                                 )}
                                             </div>
                                             <div className="flex-1">
                                                 <div className="flex items-center justify-between mb-1">
                                                     <p className="font-semibold text-gray-900">{retailer.name}</p>
-                                                    <div className="flex items-center space-x-1 text-sm text-green-600">
+                                                    <div className="flex items-center space-x-1 text-sm text-blue-600">
                                                         <span>⭐</span>
                                                         <span>{retailer.rating}</span>
                                                     </div>
                                                 </div>
                                                 <p className="text-sm text-gray-600 mb-1">{retailer.category}</p>
                                                 <span className={`text-xs px-2 py-1 rounded-full ${retailer.online
-                                                        ? 'bg-green-100 text-green-800'
+                                                        ? 'bg-blue-100 text-blue-800'
                                                         : 'bg-gray-100 text-gray-600'
                                                     }`}>
                                                     {retailer.online ? 'Online' : 'Offline'}
