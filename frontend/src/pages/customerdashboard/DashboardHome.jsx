@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { 
   FiShoppingCart, 
   FiPackage, 
@@ -9,11 +9,10 @@ import {
   FiCheckCircle,
   FiArrowRight,
   FiTrendingUp,
-  FiBox,
   FiMapPin,
   FiCalendar,
-  FiX,
-  FiAlertCircle
+  FiMessageCircle,
+  FiX
 } from 'react-icons/fi';
 import {
   BarChart,
@@ -27,11 +26,14 @@ import {
   Pie,
   Cell
 } from 'recharts';
+import ChatSidebar from './ ChatSidebar';
+import NewProductOfferPopup from './NewProductOfferPopup';
 
 const DashboardHome = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [showNewProductOffer, setShowNewProductOffer] = useState(false);
   const [currentOfferProduct, setCurrentOfferProduct] = useState(null);
+  const [showChat, setShowChat] = useState(false);
 
   // New Products with Limited Time Offers
   const [newProductsWithOffers, setNewProductsWithOffers] = useState([
@@ -46,7 +48,7 @@ const DashboardHome = () => {
       delivery: 'Next day delivery',
       image: '🌾',
       isNew: true,
-      offerExpiry: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000), // 10 days from now
+      offerExpiry: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000),
       offerDescription: 'New Product Launch Offer!',
       wholesalePrice: '$89.99',
       normalPrice: '$159.99',
@@ -63,7 +65,7 @@ const DashboardHome = () => {
       delivery: 'Free shipping',
       image: '🫒',
       isNew: true,
-      offerExpiry: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
+      offerExpiry: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
       offerDescription: 'Limited Time Wholesale Price',
       wholesalePrice: '$79.99',
       normalPrice: '$99.99',
@@ -78,10 +80,8 @@ const DashboardHome = () => {
     );
     
     if (hasActiveOffers) {
-      // Show offer popup after a short delay
       const timer = setTimeout(() => {
         setShowNewProductOffer(true);
-        // Set the first available offer product
         const activeOffer = newProductsWithOffers.find(product => 
           product.isNew && new Date(product.offerExpiry) > new Date()
         );
@@ -101,7 +101,7 @@ const DashboardHome = () => {
           daysRemaining: Math.max(0, Math.ceil((new Date(product.offerExpiry) - new Date()) / (24 * 60 * 60 * 1000)))
         }))
       );
-    }, 60000); // Update every minute
+    }, 60000);
 
     return () => clearInterval(interval);
   }, []);
@@ -262,7 +262,6 @@ const DashboardHome = () => {
 
   // Function to handle order placement with special offer
   const handleSpecialOfferOrder = (product) => {
-    // Navigate to orders page with the special product pre-selected
     window.location.href = `/customer-dashboard/orders?product=${product.id}&offer=true`;
   };
 
@@ -291,410 +290,330 @@ const DashboardHome = () => {
     setShowNewProductOffer(true);
   };
 
-  // New Product Offer Popup Component
-  const NewProductOfferPopup = () => {
-    if (!showNewProductOffer || !currentOfferProduct) return null;
-
-    return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-        <div className="bg-white rounded-2xl max-w-md w-full mx-auto shadow-xl">
-          {/* Header */}
-          <div className="flex items-center justify-between p-6 border-b border-gray-200">
-            <div className="flex items-center space-x-3">
-              <div className="p-2 bg-green-100 rounded-lg">
-                <FiAlertCircle className="w-6 h-6 text-green-600" />
-              </div>
-              <div>
-                <h3 className="text-lg font-bold text-gray-900">New Product Alert!</h3>
-                <p className="text-sm text-gray-500">Limited Time Offer</p>
-              </div>
-            </div>
-            <button 
-              onClick={() => setShowNewProductOffer(false)}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-            >
-              <FiX className="w-5 h-5 text-gray-500" />
-            </button>
-          </div>
-
-          {/* Product Info */}
-          <div className="p-6">
-            <div className="flex items-center space-x-4 mb-4">
-              <div className="w-16 h-16 bg-blue-50 rounded-lg flex items-center justify-center text-2xl">
-                {currentOfferProduct.image}
-              </div>
-              <div className="flex-1">
-                <h4 className="font-semibold text-gray-900">{currentOfferProduct.name}</h4>
-                <p className="text-sm text-gray-500">{currentOfferProduct.category}</p>
-                <div className="flex items-center space-x-2 mt-1">
-                  <span className="text-lg font-bold text-green-600">{currentOfferProduct.price}</span>
-                  <span className="text-sm text-gray-400 line-through">{currentOfferProduct.originalPrice}</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Offer Details */}
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium text-yellow-800">
-                  {currentOfferProduct.offerDescription}
-                </span>
-                <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded">
-                  {currentOfferProduct.discount}
-                </span>
-              </div>
-              <div className="flex items-center justify-between text-sm text-yellow-700">
-                <span>Wholesale Price</span>
-                <span className="font-semibold">{currentOfferProduct.wholesalePrice}</span>
-              </div>
-              <div className="flex items-center justify-between text-sm text-yellow-700">
-                <span>Normal Price After</span>
-                <span className="font-semibold">{currentOfferProduct.normalPrice}</span>
-              </div>
-            </div>
-
-            {/* Countdown Timer */}
-            <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-red-700">Offer expires in:</span>
-                <span className="text-sm font-bold text-red-700">
-                  {currentOfferProduct.daysRemaining} days
-                </span>
-              </div>
-              <div className="w-full bg-red-200 rounded-full h-2 mt-2">
-                <div 
-                  className="bg-red-500 h-2 rounded-full transition-all duration-1000"
-                  style={{ width: `${(currentOfferProduct.daysRemaining / 10) * 100}%` }}
-                ></div>
-              </div>
-            </div>
-          </div>
-
-          {/* Actions */}
-          <div className="flex space-x-3 p-6 border-t border-gray-200">
-            <button
-              onClick={() => setShowNewProductOffer(false)}
-              className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
-            >
-              Maybe Later
-            </button>
-            <button
-              onClick={() => handleSpecialOfferOrder(currentOfferProduct)}
-              className="flex-1 px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium flex items-center justify-center"
-            >
-              <FiShoppingCart className="w-4 h-4 mr-2" />
-              Order Now & Save
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  };
-
   return (
-    <div className="space-y-6 font">
-      {/* New Product Offer Popup */}
-      <NewProductOfferPopup />
-
-      {/* Header */}
-      <div className="flex flex-col lg:flex-row items-start justify-between gap-4">
-        <div className="flex-1">
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Customer Dashboard</h1>
-          <p className="mt-1 text-sm text-gray-500">Manage your orders, track deliveries, and discover new products</p>
-        </div>
-        <div className="flex items-center space-x-3">
-          <div className="relative">
-            <input
-              type="text"
-              placeholder="Search products..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-4 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent w-64"
-            />
-          </div>
-          <button className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors">
-            <FiShoppingCart className="w-4 h-4 mr-2" />
-            New Order
-          </button>
+    <div className="flex min-h-screen bg-gray-50">
+      {/* Main Dashboard Content */}
+      <div className={`flex-1 transition-all duration-300 ${showChat ? 'mr-80' : 'mr-0'}`}>
+        <div className="p-6 space-y-6">
+          <NewProductOfferPopup 
+            show={showNewProductOffer}
+            product={currentOfferProduct}
+            onClose={() => setShowNewProductOffer(false)}
+            onOrder={handleSpecialOfferOrder}
+          />
           
-          {/* Demo button to simulate wholesaler adding new product */}
-          <button 
-            onClick={addNewProductWithOffer}
-            className="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 transition-colors"
-          >
-            <FiPackage className="w-4 h-4 mr-2" />
-            Add Demo Product
-          </button>
-        </div>
-      </div>
+          <ChatSidebar 
+            show={showChat}
+            onClose={() => setShowChat(false)}
+          />
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-        {stats.map((stat, index) => {
-          const Icon = stat.icon;
-          return (
-            <div key={index} className="bg-white rounded-lg border border-gray-200 p-5 hover:shadow-sm transition-shadow">
-              <div className="flex items-center justify-between mb-3">
-                <div className="p-2 bg-blue-50 rounded-lg">
-                  <Icon className="w-5 h-5 text-blue-600" />
-                </div>
-                <span className="text-sm font-medium text-green-600">
-                  {stat.change}
-                </span>
-              </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-1">{stat.value}</h3>
-              <p className="text-sm font-medium text-gray-700 mb-1">{stat.label}</p>
-              <p className="text-xs text-gray-500">{stat.description}</p>
+          {/* Header */}
+          <div className="flex flex-col lg:flex-row items-start justify-between gap-4">
+            <div className="flex-1">
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Customer Dashboard</h1>
+              <p className="mt-1 text-sm text-gray-500">Manage your orders, track deliveries, and discover new products</p>
             </div>
-          );
-        })}
-      </div>
-
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-        {/* Left Column - Charts & Orders */}
-        <div className="xl:col-span-2 space-y-6">
-          {/* Recommended Products */}
-          <div className="bg-white rounded-xl border border-gray-200 p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-lg font-semibold text-gray-900">Recommended for You</h2>
-              <button className="text-sm text-blue-600 font-medium hover:text-blue-700 flex items-center">
-                View all <FiArrowRight className="w-4 h-4 ml-1" />
+            <div className="flex items-center space-x-3">
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="Search products..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-4 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent w-64"
+                />
+              </div>
+              
+              <button 
+                onClick={() => setShowChat(!showChat)}
+                className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors shadow-lg"
+              >
+                <FiMessageCircle className="w-4 h-4 mr-2" />
+                {showChat ? 'Close Chat' : 'Order via Chat'}
+              </button>
+              
+              <button 
+                onClick={addNewProductWithOffer}
+                className="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 transition-colors"
+              >
+                <FiPackage className="w-4 h-4 mr-2" />
+                Add Demo Product
               </button>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {recommendedProducts.map((product) => (
-                <div 
-                  key={product.id} 
-                  className={`flex items-center space-x-4 p-4 border rounded-lg hover:shadow-sm transition-all ${
-                    product.isNew 
-                      ? 'border-green-300 bg-green-50 border-2' 
-                      : 'border-gray-100 hover:border-blue-200'
-                  }`}
-                >
-                  {product.isNew && (
-                    <div className="absolute -top-2 -left-2">
-                      <span className="bg-green-500 text-white text-xs px-2 py-1 rounded-full font-medium">
-                        NEW
-                      </span>
+          </div>
+
+          {/* Stats Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+            {stats.map((stat, index) => {
+              const Icon = stat.icon;
+              return (
+                <div key={index} className="bg-white rounded-lg border border-gray-200 p-5 hover:shadow-sm transition-shadow">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="p-2 bg-blue-50 rounded-lg">
+                      <Icon className="w-5 h-5 text-blue-600" />
                     </div>
-                  )}
-                  <div className="w-16 h-16 bg-blue-50 rounded-lg flex items-center justify-center text-2xl">
-                    {product.image}
+                    <span className="text-sm font-medium text-green-600">
+                      {stat.change}
+                    </span>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <p className="text-sm font-medium text-gray-900 truncate">{product.name}</p>
-                        <p className="text-xs text-gray-500 mt-0.5">{product.category}</p>
-                      </div>
+                  <h3 className="text-2xl font-bold text-gray-900 mb-1">{stat.value}</h3>
+                  <p className="text-sm font-medium text-gray-700 mb-1">{stat.label}</p>
+                  <p className="text-xs text-gray-500">{stat.description}</p>
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+            {/* Left Column - Charts & Orders */}
+            <div className="xl:col-span-2 space-y-6">
+              {/* Recommended Products */}
+              <div className="bg-white rounded-xl border border-gray-200 p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-lg font-semibold text-gray-900">Recommended for You</h2>
+                  <button className="text-sm text-blue-600 font-medium hover:text-blue-700 flex items-center">
+                    View all <FiArrowRight className="w-4 h-4 ml-1" />
+                  </button>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {recommendedProducts.map((product) => (
+                    <div 
+                      key={product.id} 
+                      className={`flex items-center space-x-4 p-4 border rounded-lg hover:shadow-sm transition-all relative ${
+                        product.isNew 
+                          ? 'border-green-300 bg-green-50 border-2' 
+                          : 'border-gray-100 hover:border-blue-200'
+                      }`}
+                    >
                       {product.isNew && (
-                        <div className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">
-                          {product.daysRemaining}d left
+                        <div className="absolute -top-2 -left-2">
+                          <span className="bg-green-500 text-white text-xs px-2 py-1 rounded-full font-medium">
+                            NEW
+                          </span>
                         </div>
                       )}
-                    </div>
-                    <div className="flex items-center justify-between mt-2">
-                      <div className="flex items-center space-x-2">
-                        <span className="text-lg font-bold text-gray-900">{product.price}</span>
-                        <span className="text-sm text-gray-400 line-through">{product.originalPrice}</span>
-                        <span className={`text-xs px-1.5 py-0.5 rounded ${
-                          product.isNew 
-                            ? 'bg-green-100 text-green-700' 
-                            : 'bg-red-100 text-red-700'
-                        }`}>
-                          {product.discount}
-                        </span>
-                      </div>
-                      <div className="flex items-center text-xs text-gray-500">
-                        <FiStar className="w-3 h-3 text-yellow-400 mr-1" />
-                        {product.rating}
-                      </div>
-                    </div>
-                    <div className="flex items-center justify-between mt-2">
-                      <span className="text-xs text-green-600 flex items-center">
-                        <FiTruck className="w-3 h-3 mr-1" />
-                        {product.delivery}
-                      </span>
-                      <button 
-                        onClick={() => product.isNew && setCurrentOfferProduct(product)}
-                        className={`text-xs px-3 py-1.5 rounded transition-colors ${
-                          product.isNew
-                            ? 'bg-green-600 text-white hover:bg-green-700'
-                            : 'bg-blue-600 text-white hover:bg-blue-700'
-                        }`}
-                      >
-                        {product.isNew ? 'Special Offer' : 'Add to Cart'}
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Recent Orders with Progress Tracking */}
-          <div className="bg-white rounded-xl border border-gray-200 p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-lg font-semibold text-gray-900">Recent Orders</h2>
-              <button className="text-sm text-blue-600 font-medium hover:text-blue-700 flex items-center">
-                View all <FiArrowRight className="w-4 h-4 ml-1" />
-              </button>
-            </div>
-            <div className="space-y-4">
-              {recentOrders.map((order) => {
-                const StatusIcon = getStatusIcon(order.status);
-                return (
-                  <div key={order.id} className="p-4 border border-gray-100 rounded-lg hover:border-blue-200 transition-colors">
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center space-x-3">
-                        <div className={`p-2 rounded-lg ${getStatusColor(order.status)}`}>
-                          <StatusIcon className="w-4 h-4" />
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium text-gray-900">{order.product}</p>
-                          <p className="text-xs text-gray-500">{order.id} • {order.date}</p>
-                        </div>
-                      </div>
-                      <span className="text-sm font-semibold text-gray-900">{order.amount}</span>
-                    </div>
-                    
-                    {/* Progress Bar */}
-                    <div className="mb-2">
-                      <div className="flex justify-between text-xs text-gray-500 mb-1">
-                        <span>Order Progress</span>
-                        <span>{order.progress}%</span>
-                      </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div 
-                          className={`h-2 rounded-full ${
-                            order.status === 'delivered' ? 'bg-green-500' :
-                            order.status === 'shipped' ? 'bg-blue-500' : 'bg-orange-500'
-                          }`}
-                          style={{ width: `${order.progress}%` }}
-                        ></div>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="text-gray-600 flex items-center">
-                        <FiMapPin className="w-3 h-3 mr-1" />
-                        {order.tracking}
-                      </span>
-                      <button className="text-blue-600 hover:text-blue-700 font-medium">
-                        Track Details
-                      </button>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-
-        {/* Right Column - Offers & Analytics */}
-        <div className="space-y-6">
-          {/* Current Offers */}
-          <div className="bg-white rounded-xl border border-gray-200 p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-lg font-semibold text-gray-900">Current Offers</h2>
-              <FiStar className="w-5 h-5 text-yellow-500" />
-            </div>
-            <div className="space-y-4">
-              {currentOffers.map((offer, index) => (
-                <div key={index} className="p-4 border border-gray-100 rounded-lg bg-gradient-to-r from-blue-50 to-indigo-50">
-                  <div className="flex items-start justify-between mb-2">
-                    <h3 className="font-medium text-gray-900">{offer.title}</h3>
-                    <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">
-                      {offer.code}
-                    </span>
-                  </div>
-                  <p className="text-sm text-gray-600 mb-3">{offer.description}</p>
-                  <div className="flex items-center justify-between text-xs text-gray-500">
-                    <span className="flex items-center">
-                      <FiCalendar className="w-3 h-3 mr-1" />
-                      Valid until {offer.validUntil}
-                    </span>
-                    <button className="text-blue-600 hover:text-blue-700 font-medium">
-                      Apply
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* New Products Section */}
-          <div className="bg-white rounded-xl border border-gray-200 p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-lg font-semibold text-gray-900">New Arrivals</h2>
-              <div className="p-2 bg-green-100 rounded-lg">
-                <FiPackage className="w-4 h-4 text-green-600" />
-              </div>
-            </div>
-            <div className="space-y-4">
-              {newProductsWithOffers
-                .filter(product => product.isNew)
-                .map((product) => (
-                  <div key={product.id} className="p-4 border border-green-200 rounded-lg bg-green-50">
-                    <div className="flex items-center space-x-3 mb-3">
-                      <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center text-xl">
+                      <div className="w-16 h-16 bg-blue-50 rounded-lg flex items-center justify-center text-2xl">
                         {product.image}
                       </div>
-                      <div className="flex-1">
-                        <h3 className="font-medium text-gray-900 text-sm">{product.name}</h3>
-                        <p className="text-xs text-gray-500">{product.category}</p>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-start justify-between">
+                          <div>
+                            <p className="text-sm font-medium text-gray-900 truncate">{product.name}</p>
+                            <p className="text-xs text-gray-500 mt-0.5">{product.category}</p>
+                          </div>
+                          {product.isNew && (
+                            <div className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">
+                              {product.daysRemaining}d left
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex items-center justify-between mt-2">
+                          <div className="flex items-center space-x-2">
+                            <span className="text-lg font-bold text-gray-900">{product.price}</span>
+                            <span className="text-sm text-gray-400 line-through">{product.originalPrice}</span>
+                            <span className={`text-xs px-1.5 py-0.5 rounded ${
+                              product.isNew 
+                                ? 'bg-green-100 text-green-700' 
+                                : 'bg-red-100 text-red-700'
+                            }`}>
+                              {product.discount}
+                            </span>
+                          </div>
+                          <div className="flex items-center text-xs text-gray-500">
+                            <FiStar className="w-3 h-3 text-yellow-400 mr-1" />
+                            {product.rating}
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between mt-2">
+                          <span className="text-xs text-green-600 flex items-center">
+                            <FiTruck className="w-3 h-3 mr-1" />
+                            {product.delivery}
+                          </span>
+                          <button 
+                            onClick={() => product.isNew && setCurrentOfferProduct(product)}
+                            className={`text-xs px-3 py-1.5 rounded transition-colors ${
+                              product.isNew
+                                ? 'bg-green-600 text-white hover:bg-green-700'
+                                : 'bg-blue-600 text-white hover:bg-blue-700'
+                            }`}
+                          >
+                            {product.isNew ? 'Special Offer' : 'Add to Cart'}
+                          </button>
+                        </div>
                       </div>
-                      <span className="text-xs bg-green-500 text-white px-2 py-1 rounded-full">
-                        NEW
-                      </span>
                     </div>
-                    <div className="flex items-center justify-between mb-2">
-                      <div>
-                        <span className="text-lg font-bold text-green-600">{product.price}</span>
-                        <span className="text-sm text-gray-400 line-through ml-2">{product.originalPrice}</span>
-                      </div>
-                      <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">
-                        {product.discount}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between text-xs text-gray-600 mb-3">
-                      <span>Offer ends in {product.daysRemaining} days</span>
-                      <span>After: {product.normalPrice}</span>
-                    </div>
-                    <button
-                      onClick={() => {
-                        setCurrentOfferProduct(product);
-                        setShowNewProductOffer(true);
-                      }}
-                      className="w-full bg-green-600 text-white py-2 rounded-lg text-sm font-medium hover:bg-green-700 transition-colors"
-                    >
-                      View Special Offer
-                    </button>
-                  </div>
-                ))}
-            </div>
-          </div>
+                  ))}
+                </div>
+              </div>
 
-          {/* Quick Actions */}
-          <div className="bg-white rounded-xl border border-gray-200 p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>
-            <div className="grid grid-cols-2 gap-3">
-              <button className="flex flex-col items-center p-3 border border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition-colors">
-                <FiShoppingCart className="w-6 h-6 text-blue-600 mb-2" />
-                <span className="text-sm font-medium text-gray-700">New Order</span>
-              </button>
-              <button className="flex flex-col items-center p-3 border border-gray-200 rounded-lg hover:border-green-300 hover:bg-green-50 transition-colors">
-                <FiPackage className="w-6 h-6 text-green-600 mb-2" />
-                <span className="text-sm font-medium text-gray-700">Browse</span>
-              </button>
-              <button className="flex flex-col items-center p-3 border border-gray-200 rounded-lg hover:border-purple-300 hover:bg-purple-50 transition-colors">
-                <FiTruck className="w-6 h-6 text-purple-600 mb-2" />
-                <span className="text-sm font-medium text-gray-700">Track</span>
-              </button>
-              <button className="flex flex-col items-center p-3 border border-gray-200 rounded-lg hover:border-orange-300 hover:bg-orange-50 transition-colors">
-                <FiTrendingUp className="w-6 h-6 text-orange-600 mb-2" />
-                <span className="text-sm font-medium text-gray-700">Analytics</span>
-              </button>
+              {/* Recent Orders with Progress Tracking */}
+              <div className="bg-white rounded-xl border border-gray-200 p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-lg font-semibold text-gray-900">Recent Orders</h2>
+                  <button className="text-sm text-blue-600 font-medium hover:text-blue-700 flex items-center">
+                    View all <FiArrowRight className="w-4 h-4 ml-1" />
+                  </button>
+                </div>
+                <div className="space-y-4">
+                  {recentOrders.map((order) => {
+                    const StatusIcon = getStatusIcon(order.status);
+                    return (
+                      <div key={order.id} className="p-4 border border-gray-100 rounded-lg hover:border-blue-200 transition-colors">
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center space-x-3">
+                            <div className={`p-2 rounded-lg ${getStatusColor(order.status)}`}>
+                              <StatusIcon className="w-4 h-4" />
+                            </div>
+                            <div>
+                              <p className="text-sm font-medium text-gray-900">{order.product}</p>
+                              <p className="text-xs text-gray-500">{order.id} • {order.date}</p>
+                            </div>
+                          </div>
+                          <span className="text-sm font-semibold text-gray-900">{order.amount}</span>
+                        </div>
+                        
+                        {/* Progress Bar */}
+                        <div className="mb-2">
+                          <div className="flex justify-between text-xs text-gray-500 mb-1">
+                            <span>Order Progress</span>
+                            <span>{order.progress}%</span>
+                          </div>
+                          <div className="w-full bg-gray-200 rounded-full h-2">
+                            <div 
+                              className={`h-2 rounded-full ${
+                                order.status === 'delivered' ? 'bg-green-500' :
+                                order.status === 'shipped' ? 'bg-blue-500' : 'bg-orange-500'
+                              }`}
+                              style={{ width: `${order.progress}%` }}
+                            ></div>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="text-gray-600 flex items-center">
+                            <FiMapPin className="w-3 h-3 mr-1" />
+                            {order.tracking}
+                          </span>
+                          <button className="text-blue-600 hover:text-blue-700 font-medium">
+                            Track Details
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+
+            {/* Right Column - Offers & Analytics */}
+            <div className="space-y-6">
+              {/* Current Offers */}
+              <div className="bg-white rounded-xl border border-gray-200 p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-lg font-semibold text-gray-900">Current Offers</h2>
+                  <FiStar className="w-5 h-5 text-yellow-500" />
+                </div>
+                <div className="space-y-4">
+                  {currentOffers.map((offer, index) => (
+                    <div key={index} className="p-4 border border-gray-100 rounded-lg bg-gradient-to-r from-blue-50 to-indigo-50">
+                      <div className="flex items-start justify-between mb-2">
+                        <h3 className="font-medium text-gray-900">{offer.title}</h3>
+                        <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">
+                          {offer.code}
+                        </span>
+                      </div>
+                      <p className="text-sm text-gray-600 mb-3">{offer.description}</p>
+                      <div className="flex items-center justify-between text-xs text-gray-500">
+                        <span className="flex items-center">
+                          <FiCalendar className="w-3 h-3 mr-1" />
+                          Valid until {offer.validUntil}
+                        </span>
+                        <button className="text-blue-600 hover:text-blue-700 font-medium">
+                          Apply
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* New Products Section */}
+              <div className="bg-white rounded-xl border border-gray-200 p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-lg font-semibold text-gray-900">New Arrivals</h2>
+                  <div className="p-2 bg-green-100 rounded-lg">
+                    <FiPackage className="w-4 h-4 text-green-600" />
+                  </div>
+                </div>
+                <div className="space-y-4">
+                  {newProductsWithOffers
+                    .filter(product => product.isNew)
+                    .map((product) => (
+                      <div key={product.id} className="p-4 border border-green-200 rounded-lg bg-green-50">
+                        <div className="flex items-center space-x-3 mb-3">
+                          <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center text-xl">
+                            {product.image}
+                          </div>
+                          <div className="flex-1">
+                            <h3 className="font-medium text-gray-900 text-sm">{product.name}</h3>
+                            <p className="text-xs text-gray-500">{product.category}</p>
+                          </div>
+                          <span className="text-xs bg-green-500 text-white px-2 py-1 rounded-full">
+                            NEW
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between mb-2">
+                          <div>
+                            <span className="text-lg font-bold text-green-600">{product.price}</span>
+                            <span className="text-sm text-gray-400 line-through ml-2">{product.originalPrice}</span>
+                          </div>
+                          <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">
+                            {product.discount}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between text-xs text-gray-600 mb-3">
+                          <span>Offer ends in {product.daysRemaining} days</span>
+                          <span>After: {product.normalPrice}</span>
+                        </div>
+                        <button
+                          onClick={() => {
+                            setCurrentOfferProduct(product);
+                            setShowNewProductOffer(true);
+                          }}
+                          className="w-full bg-green-600 text-white py-2 rounded-lg text-sm font-medium hover:bg-green-700 transition-colors"
+                        >
+                          View Special Offer
+                        </button>
+                      </div>
+                    ))}
+                </div>
+              </div>
+
+              {/* Quick Actions */}
+              <div className="bg-white rounded-xl border border-gray-200 p-6">
+                <h2 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>
+                <div className="grid grid-cols-2 gap-3">
+                  <button 
+                    onClick={() => setShowChat(true)}
+                    className="flex flex-col items-center p-3 border border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition-colors"
+                  >
+                    <FiMessageCircle className="w-6 h-6 text-blue-600 mb-2" />
+                    <span className="text-sm font-medium text-gray-700">Chat Order</span>
+                  </button>
+                  <button className="flex flex-col items-center p-3 border border-gray-200 rounded-lg hover:border-green-300 hover:bg-green-50 transition-colors">
+                    <FiPackage className="w-6 h-6 text-green-600 mb-2" />
+                    <span className="text-sm font-medium text-gray-700">Browse</span>
+                  </button>
+                  <button className="flex flex-col items-center p-3 border border-gray-200 rounded-lg hover:border-purple-300 hover:bg-purple-50 transition-colors">
+                    <FiTruck className="w-6 h-6 text-purple-600 mb-2" />
+                    <span className="text-sm font-medium text-gray-700">Track</span>
+                  </button>
+                  <button className="flex flex-col items-center p-3 border border-gray-200 rounded-lg hover:border-orange-300 hover:bg-orange-50 transition-colors">
+                    <FiTrendingUp className="w-6 h-6 text-orange-600 mb-2" />
+                    <span className="text-sm font-medium text-gray-700">Analytics</span>
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>

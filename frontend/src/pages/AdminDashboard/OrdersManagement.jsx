@@ -19,71 +19,9 @@ import {
   DocumentTextIcon,
   CheckIcon,
   XMarkIcon,
+  TruckIcon,
+  XCircleIcon,
 } from '@heroicons/react/24/outline';
-
-// Mock data - replace with your actual API call
-const mockOrders = [
-  {
-    id: '1',
-    customerName: 'John Smith',
-    customerPhone: '+1 (555) 123-4567',
-    product: 'Premium Widget A',
-    qty: 5,
-    unitPrice: 29.99,
-    total: 149.95,
-    method: 'Credit Card',
-    status: 'completed',
-    date: '2024-01-15',
-  },
-  {
-    id: '2',
-    customerName: 'Sarah Johnson',
-    customerPhone: '+1 (555) 987-6543',
-    product: 'Standard Widget B',
-    qty: 10,
-    unitPrice: 15.50,
-    total: 155.00,
-    method: 'Bank Transfer',
-    status: 'pending',
-    date: '2024-01-16',
-  },
-  {
-    id: '3',
-    customerName: 'Michael Brown',
-    customerPhone: '+1 (555) 456-7890',
-    product: 'Deluxe Widget C',
-    qty: 2,
-    unitPrice: 79.99,
-    total: 159.98,
-    method: 'Cash',
-    status: 'shipped',
-    date: '2024-01-14',
-  },
-  {
-    id: '4',
-    customerName: 'Emily Davis',
-    customerPhone: '+1 (555) 234-5678',
-    product: 'Basic Widget D',
-    qty: 20,
-    unitPrice: 9.99,
-    total: 199.80,
-    method: 'Credit Card',
-    status: 'cancelled',
-    date: '2024-01-13',
-  },
-  {
-    id: '5',
-    customerName: 'David Wilson',
-    customerPhone: '+1 (555) 876-5432',
-    product: 'Premium Widget A',
-    qty: 8,
-    unitPrice: 29.99,
-    total: 239.92,
-    method: 'Bank Transfer',
-    status: 'completed',
-    date: '2024-01-12',
-  },
-];
 
 const columnHelper = createColumnHelper();
 
@@ -94,12 +32,69 @@ const OrdersManagement = () => {
   const [statusFilter, setStatusFilter] = useState('');
   const [editingOrder, setEditingOrder] = useState(null);
   const [editForm, setEditForm] = useState({});
+  const [loading, setLoading] = useState(true);
 
-  // Fetch data - replace with your actual API call
+  // Fetch real data from API
   useEffect(() => {
-    // Simulate API call
-    setData(mockOrders);
+    fetchOrders();
   }, []);
+
+  const fetchOrders = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('http://localhost:5000/api/admin/orders', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        setData(result.orders || []);
+      } else {
+        throw new Error('Failed to fetch orders');
+      }
+    } catch (error) {
+      console.error('Error fetching orders:', error);
+      showMessage('Failed to fetch orders', 'red');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Update order status
+  const updateOrderStatus = async (orderId, newStatus) => {
+    try {
+      const response = await fetch(`http://localhost:5000/api/admin/orders/${orderId}/status`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({ status: newStatus }),
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        // Update local state
+        setData(prevData =>
+          prevData.map(order =>
+            order.id === orderId ? { ...order, status: newStatus } : order
+          )
+        );
+        showMessage(`Order marked as ${newStatus}`, 'green');
+        return true;
+      } else {
+        throw new Error('Failed to update order status');
+      }
+    } catch (error) {
+      console.error('Error updating order status:', error);
+      showMessage('Failed to update order status', 'red');
+      return false;
+    }
+  };
 
   // Initialize edit form when editing starts
   useEffect(() => {
@@ -113,28 +108,45 @@ const OrdersManagement = () => {
       const updatedForm = { ...prev, [field]: value };
       
       // Recalculate total if quantity or unit price changes
-      if (field === 'qty' || field === 'unitPrice') {
-        const qty = field === 'qty' ? parseInt(value) || 0 : parseInt(prev.qty) || 0;
-        const unitPrice = field === 'unitPrice' ? parseFloat(value) || 0 : parseFloat(prev.unitPrice) || 0;
-        updatedForm.total = (qty * unitPrice).toFixed(2);
+      if (field === 'quantity' || field === 'price') {
+        const qty = field === 'quantity' ? parseInt(value) || 0 : parseInt(prev.quantity) || 0;
+        const price = field === 'price' ? parseFloat(value) || 0 : parseFloat(prev.price) || 0;
+        updatedForm.total_amount = (qty * price).toFixed(2);
       }
       
       return updatedForm;
     });
   };
 
-  const handleSaveEdit = () => {
+  const handleSaveEdit = async () => {
     if (editingOrder) {
-      setData(prevData =>
-        prevData.map(item =>
-          item.id === editingOrder.id ? { ...editForm } : item
-        )
-      );
-      
-      // Show success message
-      showMessage('Order updated successfully!', 'green');
-      setEditingOrder(null);
-      setEditForm({});
+      try {
+        const response = await fetch(`http://localhost:5000/api/admin/orders/${editingOrder.id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+          body: JSON.stringify(editForm),
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+          setData(prevData =>
+            prevData.map(item =>
+              item.id === editingOrder.id ? { ...editForm } : item
+            )
+          );
+          showMessage('Order updated successfully!', 'green');
+          setEditingOrder(null);
+          setEditForm({});
+        } else {
+          throw new Error('Failed to update order');
+        }
+      } catch (error) {
+        console.error('Error updating order:', error);
+        showMessage('Failed to update order', 'red');
+      }
     }
   };
 
@@ -155,7 +167,18 @@ const OrdersManagement = () => {
   };
 
   const columns = [
-    columnHelper.accessor('customerName', {
+    columnHelper.accessor('id', {
+      header: 'Order ID',
+      cell: (info) => {
+        const order = info.row.original;
+        return (
+          <div className="font-medium text-gray-900">
+            #{info.getValue()}
+          </div>
+        );
+      },
+    }),
+    columnHelper.accessor('customer_name', {
       header: 'Customer Name',
       cell: (info) => {
         const order = info.row.original;
@@ -165,8 +188,8 @@ const OrdersManagement = () => {
           return (
             <input
               type="text"
-              value={editForm.customerName || ''}
-              onChange={(e) => handleEditChange('customerName', e.target.value)}
+              value={editForm.customer_name || ''}
+              onChange={(e) => handleEditChange('customer_name', e.target.value)}
               className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
               placeholder="Customer Name"
             />
@@ -175,12 +198,12 @@ const OrdersManagement = () => {
         
         return (
           <div className="font-medium text-gray-900">
-            {info.getValue()}
+            {info.getValue() || 'Unknown Customer'}
           </div>
         );
       },
     }),
-    columnHelper.accessor('customerPhone', {
+    columnHelper.accessor('customer_phone', {
       header: 'Phone',
       cell: (info) => {
         const order = info.row.original;
@@ -190,144 +213,69 @@ const OrdersManagement = () => {
           return (
             <input
               type="tel"
-              value={editForm.customerPhone || ''}
-              onChange={(e) => handleEditChange('customerPhone', e.target.value)}
+              value={editForm.customer_phone || ''}
+              onChange={(e) => handleEditChange('customer_phone', e.target.value)}
               className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
               placeholder="Phone Number"
             />
           );
         }
         
+        const phone = info.getValue() || order.mpesa_phone_number || 'N/A';
         return (
           <div className="text-gray-600">
-            {info.getValue()}
+            {phone}
           </div>
         );
       },
     }),
-    columnHelper.accessor('product', {
-      header: 'Product',
+    columnHelper.accessor('items', {
+      header: 'Products',
       cell: (info) => {
-        const order = info.row.original;
-        const isEditing = editingOrder?.id === order.id;
-        
-        if (isEditing) {
-          return (
-            <select
-              value={editForm.product || ''}
-              onChange={(e) => handleEditChange('product', e.target.value)}
-              className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
-            >
-              <option value="">Select Product</option>
-              <option value="Premium Widget A">Premium Widget A</option>
-              <option value="Standard Widget B">Standard Widget B</option>
-              <option value="Deluxe Widget C">Deluxe Widget C</option>
-              <option value="Basic Widget D">Basic Widget D</option>
-              <option value="Enterprise Widget E">Enterprise Widget E</option>
-            </select>
-          );
-        }
-        
-        return info.getValue();
-      },
-    }),
-    columnHelper.accessor('qty', {
-      header: 'Qty',
-      cell: (info) => {
-        const order = info.row.original;
-        const isEditing = editingOrder?.id === order.id;
-        
-        if (isEditing) {
-          return (
-            <input
-              type="number"
-              min="1"
-              value={editForm.qty || ''}
-              onChange={(e) => handleEditChange('qty', e.target.value)}
-              className="w-20 px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
-            />
-          );
-        }
-        
+        const items = info.getValue();
         return (
-          <div className="text-center">
+          <div className="max-w-xs">
+            {items && items.map((item, index) => (
+              <div key={index} className="text-sm text-gray-600">
+                {item.product} (x{item.quantity})
+              </div>
+            ))}
+          </div>
+        );
+      },
+    }),
+    columnHelper.accessor('total_quantity', {
+      header: 'Total Qty',
+      cell: (info) => {
+        return (
+          <div className="text-center font-medium">
             {info.getValue()}
           </div>
         );
       },
     }),
-    columnHelper.accessor('unitPrice', {
-      header: 'Unit Price',
+    columnHelper.accessor('total_amount', {
+      header: 'Total Amount',
       cell: (info) => {
-        const order = info.row.original;
-        const isEditing = editingOrder?.id === order.id;
-        
-        if (isEditing) {
-          return (
-            <div className="flex items-center">
-              <span className="text-gray-500 mr-1">$</span>
-              <input
-                type="number"
-                step="0.01"
-                min="0"
-                value={editForm.unitPrice || ''}
-                onChange={(e) => handleEditChange('unitPrice', e.target.value)}
-                className="w-24 px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
-              />
-            </div>
-          );
-        }
-        
-        return `$${info.getValue().toFixed(2)}`;
-      },
-    }),
-    columnHelper.accessor('total', {
-      header: 'Total',
-      cell: (info) => {
-        const order = info.row.original;
-        const isEditing = editingOrder?.id === order.id;
-        
-        if (isEditing) {
-          return (
-            <div className="font-semibold text-gray-900">
-              ${editForm.total || '0.00'}
-            </div>
-          );
-        }
-        
+        const amount = parseFloat(info.getValue());
         return (
           <div className="font-semibold text-gray-900">
-            ${info.getValue().toFixed(2)}
+            KSh {amount.toLocaleString('en-KE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </div>
         );
       },
     }),
-    columnHelper.accessor('method', {
+    columnHelper.accessor('payment_method', {
       header: 'Payment Method',
       cell: (info) => {
-        const order = info.row.original;
-        const isEditing = editingOrder?.id === order.id;
-        
-        if (isEditing) {
-          return (
-            <select
-              value={editForm.method || ''}
-              onChange={(e) => handleEditChange('method', e.target.value)}
-              className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
-            >
-              <option value="">Select Method</option>
-              <option value="Credit Card">Credit Card</option>
-              <option value="Bank Transfer">Bank Transfer</option>
-              <option value="Cash">Cash</option>
-              <option value="PayPal">PayPal</option>
-              <option value="Digital Wallet">Digital Wallet</option>
-            </select>
-          );
-        }
+        const method = info.getValue();
+        const displayMethod = method === 'mpesa' ? 'M-Pesa' : 
+                            method === 'cash_on_delivery' ? 'Cash on Delivery' : 
+                            method.charAt(0).toUpperCase() + method.slice(1);
         
         return (
           <div className="text-gray-600">
-            {info.getValue()}
+            {displayMethod}
           </div>
         );
       },
@@ -344,6 +292,7 @@ const OrdersManagement = () => {
           completed: 'bg-green-100 text-green-800 border border-green-200',
           cancelled: 'bg-red-100 text-red-800 border border-red-200',
           shipped: 'bg-blue-100 text-blue-800 border border-blue-200',
+          processing: 'bg-purple-100 text-purple-800 border border-purple-200',
         };
         
         if (isEditing) {
@@ -354,6 +303,7 @@ const OrdersManagement = () => {
               className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
             >
               <option value="pending">Pending</option>
+              <option value="processing">Processing</option>
               <option value="completed">Completed</option>
               <option value="shipped">Shipped</option>
               <option value="cancelled">Cancelled</option>
@@ -363,36 +313,25 @@ const OrdersManagement = () => {
         
         return (
           <span
-            className={`px-3 py-1 rounded-full text-xs font-semibold ${statusColors[status]}`}
+            className={`px-3 py-1 rounded-full text-xs font-semibold ${statusColors[status] || 'bg-gray-100 text-gray-800'}`}
           >
             {status.charAt(0).toUpperCase() + status.slice(1)}
           </span>
         );
       },
     }),
-    columnHelper.accessor('date', {
+    columnHelper.accessor('created_at', {
       header: 'Date',
       cell: (info) => {
-        const order = info.row.original;
-        const isEditing = editingOrder?.id === order.id;
-        
-        if (isEditing) {
-          return (
-            <input
-              type="date"
-              value={editForm.date || ''}
-              onChange={(e) => handleEditChange('date', e.target.value)}
-              className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
-            />
-          );
-        }
-        
+        const dateString = info.getValue();
         return (
           <div className="text-gray-600">
-            {new Date(info.getValue()).toLocaleDateString('en-US', {
+            {new Date(dateString).toLocaleDateString('en-KE', {
               year: 'numeric',
               month: 'short',
-              day: 'numeric'
+              day: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit'
             })}
           </div>
         );
@@ -429,6 +368,22 @@ const OrdersManagement = () => {
         return (
           <div className="flex space-x-2 justify-center">
             <button
+              onClick={() => handleMarkAsShipped(order)}
+              className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors duration-200"
+              title="Mark as Shipped"
+              disabled={order.status === 'shipped' || order.status === 'cancelled'}
+            >
+              <TruckIcon className="w-5 h-5" />
+            </button>
+            <button
+              onClick={() => handleCancelOrder(order)}
+              className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors duration-200"
+              title="Cancel Order"
+              disabled={order.status === 'cancelled' || order.status === 'completed'}
+            >
+              <XCircleIcon className="w-5 h-5" />
+            </button>
+            <button
               onClick={() => handlePrintReceipt(order)}
               className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors duration-200"
               title="Print Receipt"
@@ -448,13 +403,6 @@ const OrdersManagement = () => {
               title="Edit Order"
             >
               <PencilIcon className="w-5 h-5" />
-            </button>
-            <button
-              onClick={() => handleDeleteOrder(order)}
-              className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors duration-200"
-              title="Delete Order"
-            >
-              <TrashIcon className="w-5 h-5" />
             </button>
           </div>
         );
@@ -484,10 +432,32 @@ const OrdersManagement = () => {
   });
 
   // Action handlers
+  const handleMarkAsShipped = async (order) => {
+    if (await updateOrderStatus(order.id, 'shipped')) {
+      // Success handled in updateOrderStatus
+    }
+  };
+
+  const handleCancelOrder = async (order) => {
+    if (confirm(`Are you sure you want to cancel order #${order.id}? This action cannot be undone.`)) {
+      if (await updateOrderStatus(order.id, 'cancelled')) {
+        // Success handled in updateOrderStatus
+      }
+    }
+  };
+
   const handlePrintReceipt = (order) => {
     console.log('Print receipt for order:', order);
     
     const printWindow = window.open('', '_blank');
+    const itemsHtml = order.items.map(item => `
+      <div class="item-row">
+        <p><strong>${item.product}</strong> (x${item.quantity})</p>
+        <p>KSh ${parseFloat(item.price).toLocaleString('en-KE', { minimumFractionDigits: 2 })} each</p>
+        <p>Subtotal: KSh ${parseFloat(item.subtotal).toLocaleString('en-KE', { minimumFractionDigits: 2 })}</p>
+      </div>
+    `).join('');
+    
     printWindow.document.write(`
       <html>
         <head>
@@ -498,6 +468,7 @@ const OrdersManagement = () => {
             .header { text-align: center; margin-bottom: 20px; }
             .section { margin: 10px 0; }
             .total { font-weight: bold; font-size: 1.2em; margin-top: 10px; }
+            .item-row { border-bottom: 1px solid #eee; padding: 5px 0; }
           </style>
         </head>
         <body>
@@ -507,18 +478,18 @@ const OrdersManagement = () => {
               <p>Order #${order.id}</p>
             </div>
             <div class="section">
-              <p><strong>Date:</strong> ${new Date(order.date).toLocaleDateString()}</p>
-              <p><strong>Customer:</strong> ${order.customerName}</p>
-              <p><strong>Phone:</strong> ${order.customerPhone}</p>
+              <p><strong>Date:</strong> ${new Date(order.created_at).toLocaleDateString('en-KE')}</p>
+              <p><strong>Customer:</strong> ${order.customer_name || 'N/A'}</p>
+              <p><strong>Email:</strong> ${order.customer_email || 'N/A'}</p>
+              <p><strong>Phone:</strong> ${order.customer_phone || order.mpesa_phone_number || 'N/A'}</p>
             </div>
             <div class="section">
-              <p><strong>Product:</strong> ${order.product}</p>
-              <p><strong>Quantity:</strong> ${order.qty}</p>
-              <p><strong>Unit Price:</strong> $${order.unitPrice.toFixed(2)}</p>
-              <p class="total">Total: $${order.total.toFixed(2)}</p>
+              <h4>Order Items:</h4>
+              ${itemsHtml}
+              <p class="total">Total: KSh ${parseFloat(order.total_amount).toLocaleString('en-KE', { minimumFractionDigits: 2 })}</p>
             </div>
             <div class="section">
-              <p><strong>Payment Method:</strong> ${order.method}</p>
+              <p><strong>Payment Method:</strong> ${order.payment_method === 'mpesa' ? 'M-Pesa' : 'Cash on Delivery'}</p>
               <p><strong>Status:</strong> ${order.status.charAt(0).toUpperCase() + order.status.slice(1)}</p>
             </div>
           </div>
@@ -537,6 +508,21 @@ const OrdersManagement = () => {
   const handleViewOrder = (order) => {
     console.log('View order:', order);
     
+    const itemsHtml = order.items.map(item => `
+      <div class="border-b border-gray-200 py-3">
+        <div class="flex justify-between items-start">
+          <div>
+            <p class="font-medium">${item.product}</p>
+            <p class="text-sm text-gray-600">Quantity: ${item.quantity}</p>
+          </div>
+          <div class="text-right">
+            <p class="text-sm text-gray-600">Price: KSh ${parseFloat(item.price).toLocaleString('en-KE', { minimumFractionDigits: 2 })}</p>
+            <p class="font-semibold">Subtotal: KSh ${parseFloat(item.subtotal).toLocaleString('en-KE', { minimumFractionDigits: 2 })}</p>
+          </div>
+        </div>
+      </div>
+    `).join('');
+    
     const modal = document.createElement('div');
     modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
     modal.innerHTML = `
@@ -552,9 +538,16 @@ const OrdersManagement = () => {
           <div>
             <h4 class="font-semibold text-gray-700 mb-2">Customer Information</h4>
             <div class="space-y-2">
-              <p><strong>Name:</strong> ${order.customerName}</p>
-              <p><strong>Phone:</strong> ${order.customerPhone}</p>
-              <p><strong>Order Date:</strong> ${new Date(order.date).toLocaleDateString()}</p>
+              <p><strong>Name:</strong> ${order.customer_name || 'N/A'}</p>
+              <p><strong>Email:</strong> ${order.customer_email || 'N/A'}</p>
+              <p><strong>Phone:</strong> ${order.customer_phone || order.mpesa_phone_number || 'N/A'}</p>
+              <p><strong>Order Date:</strong> ${new Date(order.created_at).toLocaleDateString('en-KE', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+              })}</p>
             </div>
           </div>
           
@@ -566,29 +559,23 @@ const OrdersManagement = () => {
                   order.status === 'completed' ? 'bg-green-100 text-green-800' :
                   order.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
                   order.status === 'shipped' ? 'bg-blue-100 text-blue-800' :
+                  order.status === 'processing' ? 'bg-purple-100 text-purple-800' :
                   'bg-red-100 text-red-800'
                 }">
                   ${order.status.charAt(0).toUpperCase() + order.status.slice(1)}
                 </span>
               </p>
-              <p><strong>Payment Method:</strong> ${order.method}</p>
+              <p><strong>Payment Method:</strong> ${order.payment_method === 'mpesa' ? 'M-Pesa' : 'Cash on Delivery'}</p>
+              <p><strong>Total Quantity:</strong> ${order.total_quantity}</p>
+              <p><strong>Total Amount:</strong> KSh ${parseFloat(order.total_amount).toLocaleString('en-KE', { minimumFractionDigits: 2 })}</p>
             </div>
           </div>
         </div>
         
         <div class="mt-6">
-          <h4 class="font-semibold text-gray-700 mb-2">Product Details</h4>
+          <h4 class="font-semibold text-gray-700 mb-2">Order Items</h4>
           <div class="border rounded-lg p-4">
-            <div class="flex justify-between items-center">
-              <div>
-                <p class="font-medium">${order.product}</p>
-                <p class="text-sm text-gray-600">Quantity: ${order.qty}</p>
-              </div>
-              <div class="text-right">
-                <p class="text-sm text-gray-600">Unit Price: $${order.unitPrice.toFixed(2)}</p>
-                <p class="font-semibold">Total: $${order.total.toFixed(2)}</p>
-              </div>
-            </div>
+            ${itemsHtml}
           </div>
         </div>
         
@@ -616,28 +603,18 @@ const OrdersManagement = () => {
     setEditingOrder(order);
   };
 
-  const handleDeleteOrder = (order) => {
-    console.log('Delete order:', order);
-    
-    if (confirm(`Are you sure you want to delete order #${order.id} for ${order.customerName}? This action cannot be undone.`)) {
-      setData(prevData => prevData.filter(item => item.id !== order.id));
-      showMessage(`Order #${order.id} has been deleted.`, 'red');
-    }
-  };
-
   const handleExportCSV = () => {
-    const headers = ['ID', 'Customer Name', 'Phone', 'Product', 'Quantity', 'Unit Price', 'Total', 'Payment Method', 'Status', 'Date'];
+    const headers = ['ID', 'Customer Name', 'Customer Email', 'Phone', 'Total Quantity', 'Total Amount', 'Payment Method', 'Status', 'Date'];
     const csvData = filteredData.map(order => [
       order.id,
-      order.customerName,
-      order.customerPhone,
-      order.product,
-      order.qty,
-      order.unitPrice,
-      order.total,
-      order.method,
+      order.customer_name || 'N/A',
+      order.customer_email || 'N/A',
+      order.customer_phone || order.mpesa_phone_number || 'N/A',
+      order.total_quantity,
+      parseFloat(order.total_amount).toFixed(2),
+      order.payment_method,
       order.status,
-      order.date
+      new Date(order.created_at).toLocaleDateString('en-KE')
     ]);
     
     const csvContent = [
@@ -657,6 +634,17 @@ const OrdersManagement = () => {
     
     showMessage(`Exported ${filteredData.length} orders to CSV file.`, 'green');
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 p-6 font flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading orders...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 p-6 font">
@@ -689,7 +677,7 @@ const OrdersManagement = () => {
             <div className="flex items-center">
               <div className="flex-shrink-0">
                 <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
-                  <EyeIcon className="w-4 h-4 text-white" />
+                  <CheckIcon className="w-4 h-4 text-white" />
                 </div>
               </div>
               <div className="ml-4">
@@ -705,7 +693,7 @@ const OrdersManagement = () => {
             <div className="flex items-center">
               <div className="flex-shrink-0">
                 <div className="w-8 h-8 bg-yellow-500 rounded-full flex items-center justify-center">
-                  <PencilIcon className="w-4 h-4 text-white" />
+                  <TruckIcon className="w-4 h-4 text-white" />
                 </div>
               </div>
               <div className="ml-4">
@@ -721,7 +709,7 @@ const OrdersManagement = () => {
             <div className="flex items-center">
               <div className="flex-shrink-0">
                 <div className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center">
-                  <TrashIcon className="w-4 h-4 text-white" />
+                  <XCircleIcon className="w-4 h-4 text-white" />
                 </div>
               </div>
               <div className="ml-4">
@@ -745,7 +733,7 @@ const OrdersManagement = () => {
                 </div>
                 <input
                   type="text"
-                  placeholder="Search orders by customer, product, or phone..."
+                  placeholder="Search orders by customer name, order ID, or phone..."
                   value={globalFilter ?? ''}
                   onChange={(e) => setGlobalFilter(e.target.value)}
                   className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
@@ -760,6 +748,7 @@ const OrdersManagement = () => {
                 >
                   <option value="">All Status</option>
                   <option value="pending">Pending</option>
+                  <option value="processing">Processing</option>
                   <option value="completed">Completed</option>
                   <option value="shipped">Shipped</option>
                   <option value="cancelled">Cancelled</option>

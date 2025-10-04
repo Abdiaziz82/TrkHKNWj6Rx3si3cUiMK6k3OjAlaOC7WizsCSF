@@ -43,9 +43,15 @@ def create_app():
     # Register blueprints
     from app.routes.auth.register import register_bp
     from app.routes.auth.login import login_bp
+
     from app.routes.products.product import products_bp
     from app.routes.messages import messages_bp
+
+    from app.routes.products.product import products_bp  # Correct import path
+    from app.routes.orders import orders_bp
+
     
+    app.register_blueprint(orders_bp, url_prefix='/api')
     app.register_blueprint(register_bp, url_prefix='/api/auth')
     app.register_blueprint(login_bp, url_prefix='/api/auth')
     app.register_blueprint(products_bp, url_prefix='/api')

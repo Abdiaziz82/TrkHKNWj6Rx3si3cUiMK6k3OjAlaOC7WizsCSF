@@ -8,11 +8,10 @@ import {
   Package,
   AlertCircle,
   Receipt,
-  MapPin,
-  Calendar,
   CreditCard,
-  Wallet
+  User
 } from "lucide-react";
+import OrderDetail from './OrderDetail';
 
 const Orders = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -22,83 +21,117 @@ const Orders = () => {
   const [view, setView] = useState("list");
   const [orders, setOrders] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [currentUser, setCurrentUser] = useState(null);
   const itemsPerPage = 6;
 
-  // Current user information
-  const currentUser = {
-    id: "CUST-001",
-    name: "Abiaziz Mohammed",
-    business: "Abiaziz Supermarket",
-    location: "Dar es Salaam",
-    phone: "+255 789 123 456",
-    email: "abiaziz@business.com"
-  };
+  const API_BASE_URL = 'http://localhost:5000/api';
 
-  // Fetch orders from localStorage (where products page saves orders)
+  // Fetch current user and orders
   useEffect(() => {
-    const fetchOrders = () => {
+    const fetchUserAndOrders = async () => {
       try {
         setIsLoading(true);
-        const savedOrders = JSON.parse(localStorage.getItem('customerOrders') || '[]');
         
-        // Transform the data to match our order structure
-        const transformedOrders = savedOrders.map((order, index) => {
-          const orderDate = new Date(order.createdAt);
-          const deliveryDate = new Date(orderDate.getTime() + 3 * 24 * 60 * 60 * 1000); // +3 days
-          
-          return {
-            id: order.orderNumber || `ORD-${String(index + 1).padStart(3, '0')}`,
-            customerId: currentUser.id,
-            retailerName: currentUser.name,
-            businessName: currentUser.business,
-            orderDate: orderDate.toISOString().split('T')[0],
-            deliveryDate: deliveryDate.toISOString().split('T')[0],
-            totalAmount: order.total,
-            items: order.items ? order.items.length : 0,
-            status: order.status === 'paid' ? 'Approved' : 
-                   order.status === 'pending' ? 'Pending' : 'Pending',
-            priority: "Medium",
-            paymentStatus: order.status === 'paid' ? 'Paid' : 
-                         order.paymentMethod === 'Cash on Delivery' ? 'Pending' : 'Pending Payment',
-            paymentMethod: order.paymentMethod,
-            paymentDetails: order.phoneNumber ? {
-              provider: order.paymentMethod,
-              phoneNumber: order.phoneNumber,
-              transactionId: order.paymentMethod === 'M-Pesa' ? `MPE${Date.now()}` : 
-                           order.paymentMethod === 'Airtel Money' ? `AIR${Date.now()}` : 
-                           `TIG${Date.now()}`,
-              paidAt: new Date().toLocaleString()
-            } : null,
-            location: currentUser.location,
-            itemsList: order.items ? order.items.map(item => ({
-              name: item.name,
-              quantity: item.quantity,
-              price: item.price,
-              category: "Groceries"
-            })) : [],
-            tracking: {
-              currentLocation: order.status === 'paid' ? "Warehouse Processing" : "Order Received",
-              estimatedDelivery: deliveryDate.toISOString().split('T')[0],
-              driver: order.status === 'paid' ? "John M. - +255 789 012 345" : "Not assigned yet",
-              updates: [
-                { 
-                  status: "Order Placed", 
-                  timestamp: orderDate.toLocaleString(), 
-                  location: "Online" 
-                },
-                ...(order.status === 'paid' ? [{
-                  status: "Processing",
-                  timestamp: new Date(orderDate.getTime() + 2 * 60 * 60 * 1000).toLocaleString(),
-                  location: "Warehouse"
-                }] : [])
-              ]
-            }
-          };
+        // Fetch user data from localStorage or token
+        const userData = JSON.parse(localStorage.getItem('user') || '{}');
+        setCurrentUser(userData);
+
+        // Fetch orders from API
+        const response = await fetch(`${API_BASE_URL}/orders`, {
+          method: 'GET',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+          },
         });
 
-        // Sort orders by date (newest first)
-        transformedOrders.sort((a, b) => new Date(b.orderDate) - new Date(a.orderDate));
-        setOrders(transformedOrders);
+        if (!response.ok) {
+          throw new Error(`Failed to fetch orders: ${response.status}`);
+        }
+
+        const result = await response.json();
+        
+        if (result.success) {
+          // Transform API data to match our frontend structure
+          const transformedOrders = result.orders.map(order => {
+            const orderDate = new Date(order.created_at);
+            const deliveryDate = new Date(orderDate.getTime() + 3 * 24 * 60 * 60 * 1000); // +3 days
+            
+            // Determine status mapping
+            let status = "Pending";
+            if (order.status === 'processing' || order.status === 'payment_initiated') {
+              status = "Processing";
+            } else if (order.status === 'paid') {
+              status = "Approved";
+            } else if (order.status === 'shipped') {
+              status = "Dispatched";
+            } else if (order.status === 'delivered') {
+              status = "Completed";
+            } else if (order.status === 'cancelled') {
+              status = "Cancelled";
+            }
+
+            // Determine payment status
+            let paymentStatus = "Pending";
+            if (order.status === 'paid' || order.status === 'payment_initiated') {
+              paymentStatus = "Paid";
+            } else if (order.payment_method === 'cash_on_delivery') {
+              paymentStatus = "Pending";
+            }
+
+            return {
+              id: order.id,
+              orderNumber: `ORD-${String(order.id).padStart(3, '0')}`,
+              customerId: order.customer_id,
+              customerEmail: order.customer,
+              orderDate: orderDate.toISOString().split('T')[0],
+              deliveryDate: deliveryDate.toISOString().split('T')[0],
+              totalAmount: parseFloat(order.total_amount),
+              items: order.total_quantity,
+              status: status,
+              paymentMethod: order.payment_method === 'mpesa' ? 'M-Pesa' : 
+                           order.payment_method === 'cash_on_delivery' ? 'Cash on Delivery' : 
+                           order.payment_method,
+              paymentStatus: paymentStatus,
+              paymentDetails: order.mpesa_phone_number ? {
+                provider: 'M-Pesa',
+                phoneNumber: order.mpesa_phone_number,
+                transactionId: order.mpesa_checkout_request_id || `MPE${order.id}`,
+                paidAt: orderDate.toLocaleString()
+              } : null,
+              itemsList: order.items ? order.items.map(item => ({
+                name: item.product,
+                quantity: item.quantity,
+                price: parseFloat(item.price),
+                subtotal: parseFloat(item.subtotal),
+                category: "Product"
+              })) : [],
+              tracking: {
+                currentLocation: status === "Approved" ? "Warehouse Processing" : "Order Received",
+                estimatedDelivery: deliveryDate.toISOString().split('T')[0],
+                driver: status === "Approved" ? "John M. - +254 789 012 345" : "Not assigned yet",
+                updates: [
+                  { 
+                    status: "Order Placed", 
+                    timestamp: orderDate.toLocaleString(), 
+                    location: "Online" 
+                  },
+                  ...(status === "Approved" ? [{
+                    status: "Processing",
+                    timestamp: new Date(orderDate.getTime() + 2 * 60 * 60 * 1000).toLocaleString(),
+                    location: "Warehouse"
+                  }] : [])
+                ]
+              }
+            };
+          });
+
+          // Sort orders by date (newest first)
+          transformedOrders.sort((a, b) => new Date(b.orderDate) - new Date(a.orderDate));
+          setOrders(transformedOrders);
+        } else {
+          throw new Error(result.message || 'Failed to fetch orders');
+        }
       } catch (error) {
         console.error('Error fetching orders:', error);
       } finally {
@@ -106,41 +139,22 @@ const Orders = () => {
       }
     };
 
-    fetchOrders();
-
-    // Listen for storage changes (when new orders are added from products page)
-    const handleStorageChange = () => {
-      fetchOrders();
-    };
-
-    window.addEventListener('storage', handleStorageChange);
-    
-    // Also check periodically for new orders
-    const interval = setInterval(fetchOrders, 5000);
-
-    return () => {
-      window.removeEventListener('storage', handleStorageChange);
-      clearInterval(interval);
-    };
+    fetchUserAndOrders();
   }, []);
-
-  // Only show orders for the current user
-  const userOrders = useMemo(() => {
-    return orders.filter(order => order.customerId === currentUser.id);
-  }, [orders]);
 
   // Filter orders based on search and filters
   const filteredOrders = useMemo(() => {
-    return userOrders.filter(order => {
+    return orders.filter(order => {
       const matchesSearch =
-        order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        order.status.toLowerCase().includes(searchTerm.toLowerCase());
+        order.orderNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        order.status.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        order.paymentMethod.toLowerCase().includes(searchTerm.toLowerCase());
      
       const matchesStatus = statusFilter === "all" || order.status === statusFilter;
      
       return matchesSearch && matchesStatus;
     });
-  }, [searchTerm, statusFilter, userOrders]);
+  }, [searchTerm, statusFilter, orders]);
 
   // Pagination
   const totalPages = Math.ceil(filteredOrders.length / itemsPerPage);
@@ -149,12 +163,12 @@ const Orders = () => {
     currentPage * itemsPerPage
   );
 
-  // Format currency
+  // Format currency in KSH
   const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('en-TZ', {
+    return new Intl.NumberFormat('en-KE', {
       style: 'currency',
-      currency: 'TZS',
-      minimumFractionDigits: 0,
+      currency: 'KES',
+      minimumFractionDigits: 2,
     }).format(amount);
   };
 
@@ -163,8 +177,10 @@ const Orders = () => {
     switch (status) {
       case "Pending":
         return { color: "bg-yellow-100 text-yellow-800", icon: Clock, description: "Your order is being processed" };
+      case "Processing":
+        return { color: "bg-blue-100 text-blue-800", icon: Clock, description: "Payment is being processed" };
       case "Approved":
-        return { color: "bg-blue-100 text-blue-800", icon: CheckCircle, description: "Order approved and ready for dispatch" };
+        return { color: "bg-green-100 text-green-800", icon: CheckCircle, description: "Order approved and ready for dispatch" };
       case "Dispatched":
         return { color: "bg-purple-100 text-purple-800", icon: Truck, description: "Your order is on the way" };
       case "Completed":
@@ -201,7 +217,7 @@ const Orders = () => {
       <!DOCTYPE html>
       <html>
         <head>
-          <title>Receipt - ${order.id}</title>
+          <title>Receipt - ${order.orderNumber}</title>
           <style>
             body {
               font-family: Arial, sans-serif;
@@ -247,16 +263,16 @@ const Orders = () => {
         <body>
           <div class="header">
             <h1>ORDER RECEIPT</h1>
-            <h2>${order.businessName}</h2>
-            <p><strong>Receipt ID:</strong> ${order.id}</p>
+            <h2>TrkWholesale</h2>
+            <p><strong>Receipt ID:</strong> ${order.orderNumber}</p>
             <p><strong>Order Date:</strong> ${new Date(order.orderDate).toLocaleDateString()}</p>
           </div>
          
           <div class="section">
             <h3>Customer Information</h3>
-            <p><strong>Name:</strong> ${order.retailerName}</p>
-            <p><strong>Business:</strong> ${order.businessName}</p>
-            <p><strong>Location:</strong> ${order.location}</p>
+            <p><strong>Name:</strong> ${currentUser?.name || 'Customer'}</p>
+            <p><strong>Email:</strong> ${currentUser?.email || order.customerEmail}</p>
+            <p><strong>Order ID:</strong> ${order.id}</p>
           </div>
 
           <div class="section">
@@ -264,7 +280,7 @@ const Orders = () => {
             ${order.itemsList.map(item => `
               <div class="item">
                 <span>${item.name} x ${item.quantity}</span>
-                <span>${formatCurrency(item.price * item.quantity)}</span>
+                <span>${formatCurrency(item.subtotal)}</span>
               </div>
             `).join('')}
           </div>
@@ -281,9 +297,8 @@ const Orders = () => {
               <h3>Payment Information</h3>
               <p><strong>Payment Method:</strong> ${order.paymentMethod}</p>
               <p><strong>Payment Status:</strong> ${order.paymentStatus}</p>
-              ${order.paymentDetails && order.paymentDetails.transactionId ? `
+              ${order.paymentDetails ? `
                 <p><strong>Transaction ID:</strong> ${order.paymentDetails.transactionId}</p>
-                <p><strong>Paid At:</strong> ${order.paymentDetails.paidAt}</p>
                 <p><strong>Phone Number:</strong> ${order.paymentDetails.phoneNumber}</p>
               ` : ''}
             </div>
@@ -325,7 +340,7 @@ const Orders = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4 font-sans">
+    <div className="min-h-screen bg-gray-50 p-2 font">
       <div className="max-w-7xl mx-auto">
         {/* Page Header */}
         <div className="flex justify-between items-center mb-6">
@@ -333,9 +348,12 @@ const Orders = () => {
             <h1 className="text-2xl font-bold text-gray-900">My Orders</h1>
             <p className="text-gray-600 mt-1">Track your orders and view receipts</p>
           </div>
-          <div className="text-sm text-gray-500">
-            Orders placed via Products page will appear here
-          </div>
+          {currentUser && (
+            <div className="flex items-center space-x-2 text-sm text-gray-600">
+              <User className="w-4 h-4" />
+              <span>{currentUser.name || currentUser.email}</span>
+            </div>
+          )}
         </div>
 
         {/* Stats Cards */}
@@ -344,7 +362,7 @@ const Orders = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Total Orders</p>
-                <p className="text-xl font-bold text-gray-900 mt-1">{userOrders.length}</p>
+                <p className="text-xl font-bold text-gray-900 mt-1">{orders.length}</p>
               </div>
               <div className="p-2 bg-blue-100 rounded-lg">
                 <Package className="w-5 h-5 text-blue-600" />
@@ -357,7 +375,7 @@ const Orders = () => {
               <div>
                 <p className="text-sm font-medium text-gray-600">Pending Payment</p>
                 <p className="text-xl font-bold text-gray-900 mt-1">
-                  {userOrders.filter(o => o.paymentStatus === 'Pending Payment').length}
+                  {orders.filter(o => o.paymentStatus === 'Pending Payment').length}
                 </p>
               </div>
               <div className="p-2 bg-orange-100 rounded-lg">
@@ -371,7 +389,7 @@ const Orders = () => {
               <div>
                 <p className="text-sm font-medium text-gray-600">In Transit</p>
                 <p className="text-xl font-bold text-gray-900 mt-1">
-                  {userOrders.filter(o => o.status === "Dispatched").length}
+                  {orders.filter(o => o.status === "Dispatched").length}
                 </p>
               </div>
               <div className="p-2 bg-purple-100 rounded-lg">
@@ -385,7 +403,7 @@ const Orders = () => {
               <div>
                 <p className="text-sm font-medium text-gray-600">Completed</p>
                 <p className="text-xl font-bold text-gray-900 mt-1">
-                  {userOrders.filter(o => o.status === "Completed").length}
+                  {orders.filter(o => o.status === "Completed").length}
                 </p>
               </div>
               <div className="p-2 bg-green-100 rounded-lg">
@@ -418,6 +436,7 @@ const Orders = () => {
             >
               <option value="all">All Status</option>
               <option value="Pending">Pending</option>
+              <option value="Processing">Processing</option>
               <option value="Approved">Approved</option>
               <option value="Dispatched">Dispatched</option>
               <option value="Completed">Completed</option>
@@ -458,7 +477,7 @@ const Orders = () => {
                         onClick={() => handleViewDetails(order)}
                       >
                         <td className="px-4 py-3 whitespace-nowrap">
-                          <div className="font-semibold text-gray-900 text-sm">{order.id}</div>
+                          <div className="font-semibold text-gray-900 text-sm">{order.orderNumber}</div>
                           <div className="text-xs text-gray-500">{order.items} items</div>
                         </td>
                         <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
@@ -562,245 +581,6 @@ const Orders = () => {
             )}
           </div>
         )}
-      </div>
-    </div>
-  );
-};
-
-// Order Detail Component with Tracking
-const OrderDetail = ({ order, onBack, onPrintReceipt, formatCurrency, getStatusInfo, getPaymentStatusColor, currentUser }) => {
-  const StatusIcon = getStatusInfo(order.status).icon;
-  const statusInfo = getStatusInfo(order.status);
-
-  return (
-    <div className="min-h-screen bg-gray-50 p-4">
-      <div className="max-w-4xl mx-auto">
-        {/* Back Button and Header */}
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center space-x-3">
-            <button
-              onClick={onBack}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-            >
-              <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-              </svg>
-            </button>
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Order Details</h1>
-              <p className="text-gray-600 text-sm">Order #{order.id}</p>
-            </div>
-          </div>
-         
-          <div className="flex items-center space-x-2">
-            <button
-              onClick={() => onPrintReceipt(order)}
-              className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              <Receipt className="w-4 h-4" />
-              <span>Print Receipt</span>
-            </button>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left Column - Order Info */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Payment Information */}
-            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Payment Information</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <p className="text-sm text-gray-600">Payment Method</p>
-                  <p className="font-semibold text-gray-900">{order.paymentMethod}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-600">Payment Status</p>
-                  <span className={`px-3 py-1 rounded-full text-sm font-medium ${getPaymentStatusColor(order.paymentStatus)}`}>
-                    {order.paymentStatus}
-                  </span>
-                </div>
-                {order.paymentDetails && (
-                  <>
-                    <div>
-                      <p className="text-sm text-gray-600">Transaction ID</p>
-                      <p className="font-semibold text-gray-900">{order.paymentDetails.transactionId}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-600">Phone Number</p>
-                      <p className="font-semibold text-gray-900">{order.paymentDetails.phoneNumber}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-600">Paid At</p>
-                      <p className="font-semibold text-gray-900">{order.paymentDetails.paidAt}</p>
-                    </div>
-                  </>
-                )}
-              </div>
-            </div>
-
-            {/* Order Tracking */}
-            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-              <div className="flex items-center space-x-2 mb-4">
-                <Truck className="w-5 h-5 text-blue-600" />
-                <h3 className="text-lg font-semibold text-gray-900">Order Tracking</h3>
-              </div>
-             
-              {/* Current Status */}
-              <div className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <div className="flex items-center space-x-2 mb-2">
-                      <StatusIcon className="w-5 h-5 text-blue-600" />
-                      <span className="font-semibold text-gray-900">Current Status: {order.status}</span>
-                    </div>
-                    <p className="text-sm text-gray-600">{statusInfo.description}</p>
-                  </div>
-                  <span className={`px-3 py-1 rounded-full text-sm font-medium ${statusInfo.color}`}>
-                    {order.status}
-                  </span>
-                </div>
-              </div>
-
-              {/* Tracking Timeline */}
-              <div className="space-y-4">
-                <h4 className="font-medium text-gray-900">Tracking Updates</h4>
-                {order.tracking.updates.map((update, index) => (
-                  <div key={index} className="flex space-x-4">
-                    <div className="flex flex-col items-center">
-                      <div className={`w-3 h-3 rounded-full ${
-                        index === 0 ? 'bg-blue-500' :
-                        index === order.tracking.updates.length - 1 ? 'bg-green-500' : 'bg-gray-300'
-                      }`} />
-                      {index < order.tracking.updates.length - 1 && (
-                        <div className="w-px h-8 bg-gray-300 mt-1" />
-                      )}
-                    </div>
-                    <div className="flex-1 pb-4">
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <p className="font-medium text-gray-900">{update.status}</p>
-                          <p className="text-sm text-gray-500">{update.location}</p>
-                        </div>
-                        <p className="text-sm text-gray-500">{update.timestamp}</p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Delivery Information */}
-              {(order.status === "Dispatched" || order.status === "Completed") && (
-                <div className="mt-6 p-4 bg-green-50 rounded-lg border border-green-200">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <div className="flex items-center space-x-2 mb-2">
-                        <MapPin className="w-4 h-4 text-green-600" />
-                        <span className="font-medium text-gray-900">Current Location</span>
-                      </div>
-                      <p className="text-sm text-gray-600">{order.tracking.currentLocation}</p>
-                    </div>
-                    <div>
-                      <div className="flex items-center space-x-2 mb-2">
-                        <Calendar className="w-4 h-4 text-green-600" />
-                        <span className="font-medium text-gray-900">Estimated Delivery</span>
-                      </div>
-                      <p className="text-sm text-gray-600">
-                        {new Date(order.tracking.estimatedDelivery).toLocaleDateString()}
-                      </p>
-                    </div>
-                  </div>
-                  {order.tracking.driver && (
-                    <div className="mt-3 pt-3 border-t border-green-200">
-                      <div className="flex items-center space-x-2">
-                        <Truck className="w-4 h-4 text-green-600" />
-                        <span className="font-medium text-gray-900">Driver Contact</span>
-                      </div>
-                      <p className="text-sm text-gray-600">{order.tracking.driver}</p>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-
-            {/* Order Items */}
-            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Order Items</h3>
-              <div className="space-y-3">
-                {order.itemsList.map((item, index) => (
-                  <div key={index} className="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
-                    <div>
-                      <div className="font-semibold text-gray-900 text-sm">{item.name}</div>
-                      <div className="text-xs text-gray-500">Quantity: {item.quantity} • Category: {item.category}</div>
-                    </div>
-                    <div className="text-right">
-                      <div className="font-semibold text-gray-900 text-sm">{formatCurrency(item.price * item.quantity)}</div>
-                      <div className="text-xs text-gray-500">{formatCurrency(item.price)} each</div>
-                    </div>
-                  </div>
-                ))}
-                <div className="flex items-center justify-between pt-3 border-t border-gray-200">
-                  <div className="font-bold text-gray-900">Total</div>
-                  <div className="font-bold text-gray-900 text-lg">{formatCurrency(order.totalAmount)}</div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Right Column - Order Summary */}
-          <div className="space-y-6">
-            {/* Order Summary */}
-            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Order Summary</h3>
-              <div className="space-y-3">
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Order ID:</span>
-                  <span className="font-medium">{order.id}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Order Date:</span>
-                  <span className="font-medium">{new Date(order.orderDate).toLocaleDateString()}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Delivery Date:</span>
-                  <span className="font-medium">{new Date(order.deliveryDate).toLocaleDateString()}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Total Amount:</span>
-                  <span className="font-medium">{formatCurrency(order.totalAmount)}</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Delivery Address */}
-            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Delivery Address</h3>
-              <div className="space-y-2">
-                <div className="flex items-start space-x-2">
-                  <MapPin className="w-4 h-4 text-gray-400 mt-0.5" />
-                  <div>
-                    <p className="font-medium text-gray-900">{currentUser.business}</p>
-                    <p className="text-sm text-gray-600">{currentUser.location}</p>
-                    <p className="text-sm text-gray-500">{currentUser.phone}</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Support Information */}
-            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Need Help?</h3>
-              <div className="space-y-2 text-sm">
-                <p className="text-gray-600">If you have any questions about your order:</p>
-                <div className="space-y-1">
-                  <p><strong>Email:</strong> support@wholesale.com</p>
-                  <p><strong>Phone:</strong> +255 800 123 456</p>
-                  <p><strong>Hours:</strong> Mon-Fri, 8AM-6PM</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   );

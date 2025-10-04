@@ -11,6 +11,7 @@ flask-mail = "*"
 pandas = "*"
 openpyxl = "*"
 xlrd = "*"
+
 flask = "*"
 flask-sqlalchemy = "*"
 flask-socketio = "*"
@@ -19,6 +20,9 @@ python-socketio = "*"
 python-dotenv = "*"
 psycopg2-binary = "*"
 alembic = "*"
+
+requests = "*"
+
 
 [dev-packages]
 
