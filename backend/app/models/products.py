@@ -9,12 +9,13 @@ class Product(db.Model):
     name = db.Column(db.String(120), nullable=False)
     sku = db.Column(db.String(50), unique=True, nullable=False)
     description = db.Column(db.Text, nullable=True)
+    category = db.Column(db.String(100), nullable=True)  # New category field
     unit = db.Column(db.String(50), nullable=False)
     price = db.Column(db.Numeric(10, 2), nullable=False)
     stock = db.Column(db.Integer, nullable=False, default=0)
     threshold = db.Column(db.Integer, nullable=False, default=0)
     expiry_date = db.Column(db.Date, nullable=True)
-    image_filename = db.Column(db.String(255), nullable=True)  # New field for image
+    image_filename = db.Column(db.String(255), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     def to_dict(self):
@@ -23,6 +24,7 @@ class Product(db.Model):
             "name": self.name,
             "sku": self.sku,
             "description": self.description,
+            "category": self.category,  # Include category in response
             "unit": self.unit,
             "price": str(self.price),  # convert Decimal to string
             "stock": self.stock,

@@ -18,6 +18,7 @@ const InventoryManagement = () => {
     sku: '',
     description: '',
     unit: 'kg',
+    category: '', 
     price: 0,
     stock: 0,
     threshold: 0,
@@ -197,6 +198,7 @@ const handleUpdate = async (formData) => {
       stock: parseInt(item.stock),
       threshold: parseInt(item.threshold),
       expiry_date: item.expiry_date ? item.expiry_date.split('T')[0] : '',
+      category: item.category || '',
     });
     setIsAddModalOpen(true);
   };
@@ -232,6 +234,7 @@ const handleUpdate = async (formData) => {
       sku: '',
       description: '',
       unit: 'kg',
+       category: '',
       price: 0,
       stock: 0,
       threshold: 0,
@@ -294,12 +297,13 @@ const handleBulkUpload = async (event) => {
 };
 
 const downloadTemplate = () => {
-  // Create sample data for Excel template (without status field)
+  // Create sample data for Excel template with category
   const sampleData = [
     {
       name: 'Sugar 50kg',
       sku: 'SUG50',
       description: 'Premium quality sugar',
+      category: 'Food & Beverages', // Add category
       unit: 'kg',
       price: 45.99,
       stock: 150,
@@ -310,6 +314,7 @@ const downloadTemplate = () => {
       name: 'Rice 25kg',
       sku: 'RIC25',
       description: 'Basmati rice',
+      category: 'Food & Beverages', // Add category
       unit: 'kg',
       price: 89.99,
       stock: 75,
@@ -320,6 +325,7 @@ const downloadTemplate = () => {
       name: 'Flour 10kg',
       sku: 'FLR10',
       description: 'All-purpose flour',
+      category: 'Food & Beverages', // Add category
       unit: 'kg',
       price: 25.50,
       stock: 0,
@@ -328,8 +334,8 @@ const downloadTemplate = () => {
     }
   ];
 
-  // Convert to CSV for download (remove status from headers)
-  const headers = ['name', 'sku', 'description', 'unit', 'price', 'stock', 'threshold', 'expiry_date'];
+  // Convert to CSV for download (include category in headers)
+  const headers = ['name', 'sku', 'description', 'category', 'unit', 'price', 'stock', 'threshold', 'expiry_date'];
   const csvContent = [
     headers.join(','),
     ...sampleData.map(row => 
@@ -473,6 +479,21 @@ const downloadTemplate = () => {
         );
       },
     },
+    // Add this column definition to your columns array:
+{
+  accessorKey: 'category',
+  header: 'Category',
+  cell: info => {
+    const category = info.getValue();
+    return category ? (
+      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+        {category}
+      </span>
+    ) : (
+      <span className="text-gray-400">-</span>
+    );
+  },
+},
     {
       accessorKey: 'threshold',
       header: 'Threshold',
