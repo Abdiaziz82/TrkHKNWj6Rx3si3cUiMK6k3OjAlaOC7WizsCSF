@@ -1,5 +1,6 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
+from flask_socketio import SocketIO  # Add this import
 from flask_cors import CORS
 from flask_bcrypt import Bcrypt
 from flask_migrate import Migrate
@@ -10,6 +11,7 @@ import os
 db = SQLAlchemy()
 bcrypt = Bcrypt()
 migrate = Migrate()
+socketio = SocketIO(cors_allowed_origins="*")  # Add this line
 
 def create_app():
     load_dotenv()
@@ -25,6 +27,7 @@ def create_app():
     # Extensions
     db.init_app(app)
     bcrypt.init_app(app)
+    socketio.init_app(app)  # Initialize socketio with app
     
     # Enhanced CORS configuration
     CORS(
@@ -40,13 +43,19 @@ def create_app():
     # Register blueprints
     from app.routes.auth.register import register_bp
     from app.routes.auth.login import login_bp
+
+    from app.routes.products.product import products_bp
+    from app.routes.messages import messages_bp
+
     from app.routes.products.product import products_bp  # Correct import path
     from app.routes.orders import orders_bp
+
     
     app.register_blueprint(orders_bp, url_prefix='/api')
     app.register_blueprint(register_bp, url_prefix='/api/auth')
     app.register_blueprint(login_bp, url_prefix='/api/auth')
-    app.register_blueprint(products_bp, url_prefix='/api')  # This will make routes: /api/products
+    app.register_blueprint(products_bp, url_prefix='/api')
+    app.register_blueprint(messages_bp, url_prefix='/api')  # Add url_prefix
 
     with app.app_context():
         db.create_all()
