@@ -41,10 +41,13 @@ def create_app():
     from app.routes.auth.register import register_bp
     from app.routes.auth.login import login_bp
     from app.routes.products.product import products_bp  # Correct import path
+    from app.routes.messages import messages_bp
     
     app.register_blueprint(register_bp, url_prefix='/api/auth')
     app.register_blueprint(login_bp, url_prefix='/api/auth')
     app.register_blueprint(products_bp, url_prefix='/api')  # This will make routes: /api/products
+    app.register_blueprint(messages_bp)
+
 
     with app.app_context():
         db.create_all()
