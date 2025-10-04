@@ -154,18 +154,16 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
         <div className="sticky top-0 z-10 bg-white border-b border-gray-200">
           <div className="px-6 py-5">
             <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <div className="relative">
-                  <div className="w-10 h-10 bg-gradient-to-br from-indigo-600 to-indigo-700 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-600/20">
-                    <span className="text-white font-semibold text-base">EF</span>
-                  </div>
-                  <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
-                </div>
-                <div>
-                  <h1 className="text-base font-semibold text-gray-900 tracking-tight">EnterpriseFlow</h1>
-                  <p className="text-xs text-gray-500 mt-0.5">Customer Portal v2.0</p>
-                </div>
-              </div>
+             <div className="flex items-center space-x-3">
+    <div className="w-10 h-10 bg-gradient-to-br from-purple-600 to-blue-600 rounded-lg flex items-center justify-center shadow-md">
+      <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+      </svg>
+    </div>
+    <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent tracking-tight">
+      SmartERP
+    </h1>
+  </div>
               <button 
                 onClick={toggleSidebar}
                 className="lg:hidden p-1.5 rounded-lg hover:bg-gray-100 transition-colors"
