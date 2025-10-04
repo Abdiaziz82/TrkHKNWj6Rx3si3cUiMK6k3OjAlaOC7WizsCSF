@@ -22,3 +22,12 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+#database files
+*.sqlite
+*.sqlite3
+*.db
+
+#instance folder (flask specific)
+instance/
+static/
