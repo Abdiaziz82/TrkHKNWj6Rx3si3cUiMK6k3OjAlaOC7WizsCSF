@@ -12,21 +12,10 @@ import {
   FiMapPin,
   FiCalendar,
   FiMessageCircle,
-  FiX
+  FiUsers,
+  FiBox
 } from 'react-icons/fi';
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell
-} from 'recharts';
-import ChatSidebar from './ ChatSidebar';
+import ChatSidebar from './ChatSidebar';
 import NewProductOfferPopup from './NewProductOfferPopup';
 
 const DashboardHome = () => {
@@ -34,231 +23,80 @@ const DashboardHome = () => {
   const [showNewProductOffer, setShowNewProductOffer] = useState(false);
   const [currentOfferProduct, setCurrentOfferProduct] = useState(null);
   const [showChat, setShowChat] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [dashboardData, setDashboardData] = useState(null);
+  const [currentUser, setCurrentUser] = useState(null);
 
-  // New Products with Limited Time Offers
-  const [newProductsWithOffers, setNewProductsWithOffers] = useState([
-    {
-      id: 1001,
-      name: 'Organic Quinoa 20kg',
-      category: 'Grains & Superfoods',
-      price: '$129.99',
-      originalPrice: '$159.99',
-      discount: '18% OFF',
-      rating: 4.9,
-      delivery: 'Next day delivery',
-      image: '🌾',
-      isNew: true,
-      offerExpiry: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000),
-      offerDescription: 'New Product Launch Offer!',
-      wholesalePrice: '$89.99',
-      normalPrice: '$159.99',
-      daysRemaining: 10
-    },
-    {
-      id: 1002,
-      name: 'Cold-Pressed Olive Oil 10L',
-      category: 'Premium Oils',
-      price: '$79.99',
-      originalPrice: '$99.99',
-      discount: '20% OFF',
-      rating: 4.8,
-      delivery: 'Free shipping',
-      image: '🫒',
-      isNew: true,
-      offerExpiry: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-      offerDescription: 'Limited Time Wholesale Price',
-      wholesalePrice: '$79.99',
-      normalPrice: '$99.99',
-      daysRemaining: 7
-    }
-  ]);
-
-  // Check for new product offers on component mount
+  // Fetch dashboard data from API
   useEffect(() => {
-    const hasActiveOffers = newProductsWithOffers.some(product => 
-      product.isNew && new Date(product.offerExpiry) > new Date()
-    );
-    
-    if (hasActiveOffers) {
-      const timer = setTimeout(() => {
-        setShowNewProductOffer(true);
-        const activeOffer = newProductsWithOffers.find(product => 
-          product.isNew && new Date(product.offerExpiry) > new Date()
-        );
-        setCurrentOfferProduct(activeOffer);
-      }, 2000);
-      
-      return () => clearTimeout(timer);
-    }
-  }, [newProductsWithOffers]);
+    const fetchDashboardData = async () => {
+      try {
+        setIsLoading(true);
+        
+        // Get current user from localStorage
+        const userData = JSON.parse(localStorage.getItem('user') || '{}');
+        setCurrentUser(userData);
 
-  // Update days remaining periodically
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setNewProductsWithOffers(prevProducts => 
-        prevProducts.map(product => ({
-          ...product,
-          daysRemaining: Math.max(0, Math.ceil((new Date(product.offerExpiry) - new Date()) / (24 * 60 * 60 * 1000)))
-        }))
-      );
-    }, 60000);
+        const response = await fetch('http://localhost:5000/api/dashboard', {
+          method: 'GET',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
 
-    return () => clearInterval(interval);
+        if (!response.ok) {
+          throw new Error(`Failed to fetch dashboard data: ${response.status}`);
+        }
+
+        const result = await response.json();
+        
+        if (result.success) {
+          setDashboardData(result.data);
+        } else {
+          throw new Error(result.message || 'Failed to fetch dashboard data');
+        }
+      } catch (error) {
+        console.error('Error fetching dashboard data:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchDashboardData();
   }, []);
 
-  // Customer-focused stats
-  const stats = [
+  // Customer-focused stats - Now populated with real data
+  const stats = dashboardData ? [
     { 
       icon: FiShoppingCart, 
       label: 'Active Orders', 
-      value: '8', 
-      change: '+2 new',
+      value: dashboardData.stats.activeOrders.toString(), 
+      change: `+${dashboardData.stats.newOrdersThisWeek} new`,
       description: 'In progress'
     },
     { 
-      icon: FiPackage, 
-      label: 'Items in Cart', 
-      value: '12', 
-      change: '+3 items',
-      description: 'Ready to order'
+      icon: FiUsers, 
+      label: 'Total Orders', 
+      value: dashboardData.stats.totalOrders.toString(), 
+      change: `${dashboardData.stats.ordersThisMonth} this month`,
+      description: 'All time orders'
     },
     { 
       icon: FiTruck, 
       label: 'Delivery Tracking', 
-      value: '3', 
-      change: '1 arriving today',
+      value: dashboardData.stats.activeDeliveries.toString(), 
+      change: `${dashboardData.stats.deliveriesToday} arriving today`,
       description: 'Active shipments'
     },
     { 
       icon: FiDollarSign, 
       label: 'Loyalty Points', 
-      value: '1,250', 
-      change: '+150 this month',
+      value: dashboardData.stats.loyaltyPoints.toLocaleString(), 
+      change: `+${dashboardData.stats.pointsThisMonth} this month`,
       description: 'Available rewards'
     },
-  ];
-
-  // Recommended Products (including new products with offers)
-  const recommendedProducts = [
-    ...newProductsWithOffers.filter(product => product.isNew),
-    {
-      id: 1,
-      name: 'Organic Basmati Rice 25kg',
-      category: 'Grains & Rice',
-      price: '$89.99',
-      originalPrice: '$105.99',
-      discount: '15% OFF',
-      rating: 4.8,
-      delivery: 'Next day delivery',
-      image: '🍚',
-      isNew: false
-    },
-    {
-      id: 2,
-      name: 'Premium Cooking Oil 5L',
-      category: 'Cooking Essentials',
-      price: '$34.99',
-      originalPrice: '$38.99',
-      discount: '10% OFF',
-      rating: 4.6,
-      delivery: 'Free shipping',
-      image: '🛢️',
-      isNew: false
-    },
-    {
-      id: 3,
-      name: 'Granulated Sugar 50kg',
-      category: 'Sweeteners',
-      price: '$129.99',
-      originalPrice: '$149.99',
-      discount: 'Bulk discount',
-      rating: 4.7,
-      delivery: '2-day delivery',
-      image: '📦',
-      isNew: false
-    }
-  ];
-
-  // Recent Orders
-  const recentOrders = [
-    {
-      id: '#ORD-7821',
-      product: 'Wheat Flour 10kg x 4',
-      status: 'delivered',
-      date: '2 hours ago',
-      amount: '$86.40',
-      tracking: 'Delivered',
-      progress: 100
-    },
-    {
-      id: '#ORD-7819',
-      product: 'Canned Tomatoes x 24',
-      status: 'shipped',
-      date: 'Yesterday',
-      amount: '$67.20',
-      tracking: 'In transit - Arriving tomorrow',
-      progress: 75
-    },
-    {
-      id: '#ORD-7815',
-      product: 'Pasta Varieties Pack',
-      status: 'processing',
-      date: '2 days ago',
-      amount: '$124.80',
-      tracking: 'Preparing shipment',
-      progress: 25
-    }
-  ];
-
-  // Current Offers
-  const currentOffers = [
-    {
-      title: 'Bulk Order Discount',
-      description: 'Save 15% on orders over $500',
-      validUntil: '2024-12-31',
-      code: 'BULK15',
-      type: 'discount'
-    },
-    {
-      title: 'Free Shipping',
-      description: 'Free delivery on all orders this month',
-      validUntil: '2024-11-30',
-      code: 'FREESHIP',
-      type: 'shipping'
-    },
-    {
-      title: 'Loyalty Bonus',
-      description: 'Double points on all purchases',
-      validUntil: '2024-11-15',
-      code: 'AUTOMATIC',
-      type: 'loyalty'
-    }
-  ];
-
-  // Order Status Chart Data
-  const orderStatusData = [
-    { name: 'Delivered', value: 65, color: '#10b981' },
-    { name: 'In Transit', value: 20, color: '#3b82f6' },
-    { name: 'Processing', value: 15, color: '#f59e0b' }
-  ];
-
-  const getStatusColor = (status) => {
-    const colors = {
-      delivered: 'text-green-600 bg-green-50 border-green-200',
-      shipped: 'text-blue-600 bg-blue-50 border-blue-200',
-      processing: 'text-orange-600 bg-orange-50 border-orange-200'
-    };
-    return colors[status] || 'text-gray-600 bg-gray-50 border-gray-200';
-  };
-
-  const getStatusIcon = (status) => {
-    const icons = {
-      delivered: FiCheckCircle,
-      shipped: FiTruck,
-      processing: FiClock
-    };
-    return icons[status] || FiClock;
-  };
+  ] : [];
 
   // Function to handle order placement with special offer
   const handleSpecialOfferOrder = (product) => {
@@ -267,33 +105,102 @@ const DashboardHome = () => {
 
   // Function to add a new product with offer (simulating wholesaler action)
   const addNewProductWithOffer = () => {
-    const newProduct = {
-      id: Date.now(),
-      name: 'Artisanal Honey 15kg',
-      category: 'Natural Sweeteners',
-      price: '$67.99',
-      originalPrice: '$84.99',
-      discount: '20% OFF',
-      rating: 4.9,
-      delivery: 'Free shipping',
-      image: '🍯',
-      isNew: true,
-      offerExpiry: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000),
-      offerDescription: 'New Product Launch Special!',
-      wholesalePrice: '$67.99',
-      normalPrice: '$84.99',
-      daysRemaining: 10
-    };
-
-    setNewProductsWithOffers(prev => [newProduct, ...prev]);
-    setCurrentOfferProduct(newProduct);
-    setShowNewProductOffer(true);
+    // This function remains for demo purposes
+    console.log('Add demo product clicked');
   };
 
+  // Get status color
+  const getStatusColor = (status) => {
+    const colors = {
+      delivered: 'text-green-600 bg-green-50 border-green-200',
+      shipped: 'text-blue-600 bg-blue-50 border-blue-200',
+      processing: 'text-orange-600 bg-orange-50 border-orange-200',
+      pending: 'text-yellow-600 bg-yellow-50 border-yellow-200',
+      cancelled: 'text-red-600 bg-red-50 border-red-200'
+    };
+    return colors[status] || 'text-gray-600 bg-gray-50 border-gray-200';
+  };
+
+  // Get status icon
+  const getStatusIcon = (status) => {
+    const icons = {
+      delivered: FiCheckCircle,
+      shipped: FiTruck,
+      processing: FiClock,
+      pending: FiClock,
+      cancelled: FiBox
+    };
+    return icons[status] || FiClock;
+  };
+
+  // Format currency in KSH
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('en-KE', {
+      style: 'currency',
+      currency: 'KES',
+      minimumFractionDigits: 2,
+    }).format(amount);
+  };
+
+  // Get progress percentage based on status
+  const getOrderProgress = (status) => {
+    const progressMap = {
+      pending: 25,
+      processing: 50,
+      shipped: 75,
+      delivered: 100,
+      cancelled: 0
+    };
+    return progressMap[status] || 0;
+  };
+
+  // Get tracking message based on status
+  const getTrackingMessage = (status) => {
+    const messages = {
+      pending: 'Order received, preparing for processing',
+      processing: 'Processing your order in warehouse',
+      shipped: 'In transit - On the way to you',
+      delivered: 'Delivered successfully',
+      cancelled: 'Order has been cancelled'
+    };
+    return messages[status] || 'Tracking information unavailable';
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading your dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!dashboardData) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="bg-white rounded-xl p-8 border border-gray-200">
+            <FiPackage className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">No Data Available</h3>
+            <p className="text-gray-600 mb-4">We couldn't load your dashboard data at this time.</p>
+            <button 
+              onClick={() => window.location.reload()}
+              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              Try Again
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="flex min-h-screen bg-gray-50">
-      {/* Main Dashboard Content */}
-      <div className={`flex-1 transition-all duration-300 ${showChat ? 'mr-80' : 'mr-0'}`}>
+    <div className="min-h-screen bg-gray-50 relative">
+      {/* Main Dashboard Content - This stays fixed and doesn't move */}
+      <div className="w-full">
         <div className="p-6 space-y-6">
           <NewProductOfferPopup 
             show={showNewProductOffer}
@@ -302,15 +209,12 @@ const DashboardHome = () => {
             onOrder={handleSpecialOfferOrder}
           />
           
-          <ChatSidebar 
-            show={showChat}
-            onClose={() => setShowChat(false)}
-          />
-
           {/* Header */}
           <div className="flex flex-col lg:flex-row items-start justify-between gap-4">
             <div className="flex-1">
-              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Customer Dashboard</h1>
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+                Welcome back, {currentUser?.first_name || 'Customer'}!
+              </h1>
               <p className="mt-1 text-sm text-gray-500">Manage your orders, track deliveries, and discover new products</p>
             </div>
             <div className="flex items-center space-x-3">
@@ -376,73 +280,69 @@ const DashboardHome = () => {
                   </button>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {recommendedProducts.map((product) => (
-                    <div 
-                      key={product.id} 
-                      className={`flex items-center space-x-4 p-4 border rounded-lg hover:shadow-sm transition-all relative ${
-                        product.isNew 
-                          ? 'border-green-300 bg-green-50 border-2' 
-                          : 'border-gray-100 hover:border-blue-200'
-                      }`}
-                    >
-                      {product.isNew && (
-                        <div className="absolute -top-2 -left-2">
-                          <span className="bg-green-500 text-white text-xs px-2 py-1 rounded-full font-medium">
-                            NEW
-                          </span>
+                  {dashboardData.recommendedProducts.length > 0 ? (
+                    dashboardData.recommendedProducts.map((product) => (
+                      <div 
+                        key={product.id} 
+                        className="flex items-center space-x-4 p-4 border border-gray-100 rounded-lg hover:shadow-sm transition-all hover:border-blue-200"
+                      >
+                        <div className="w-16 h-16 bg-blue-50 rounded-lg flex items-center justify-center text-2xl">
+                          {product.image || '📦'}
                         </div>
-                      )}
-                      <div className="w-16 h-16 bg-blue-50 rounded-lg flex items-center justify-center text-2xl">
-                        {product.image}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-start justify-between">
-                          <div>
-                            <p className="text-sm font-medium text-gray-900 truncate">{product.name}</p>
-                            <p className="text-xs text-gray-500 mt-0.5">{product.category}</p>
-                          </div>
-                          {product.isNew && (
-                            <div className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">
-                              {product.daysRemaining}d left
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-start justify-between">
+                            <div>
+                              <p className="text-sm font-medium text-gray-900 truncate">{product.name}</p>
+                              <p className="text-xs text-gray-500 mt-0.5">{product.category}</p>
                             </div>
-                          )}
-                        </div>
-                        <div className="flex items-center justify-between mt-2">
-                          <div className="flex items-center space-x-2">
-                            <span className="text-lg font-bold text-gray-900">{product.price}</span>
-                            <span className="text-sm text-gray-400 line-through">{product.originalPrice}</span>
-                            <span className={`text-xs px-1.5 py-0.5 rounded ${
-                              product.isNew 
-                                ? 'bg-green-100 text-green-700' 
-                                : 'bg-red-100 text-red-700'
-                            }`}>
-                              {product.discount}
+                            {product.isNew && (
+                              <div className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">
+                                NEW
+                              </div>
+                            )}
+                          </div>
+                          <div className="flex items-center justify-between mt-2">
+                            <div className="flex items-center space-x-2">
+                              <span className="text-lg font-bold text-gray-900">
+                                {formatCurrency(product.price)}
+                              </span>
+                              {product.originalPrice && product.originalPrice > product.price && (
+                                <span className="text-sm text-gray-400 line-through">
+                                  {formatCurrency(product.originalPrice)}
+                                </span>
+                              )}
+                              {product.discount && (
+                                <span className="text-xs bg-red-100 text-red-700 px-1.5 py-0.5 rounded">
+                                  {product.discount}
+                                </span>
+                              )}
+                            </div>
+                            <div className="flex items-center text-xs text-gray-500">
+                              <FiStar className="w-3 h-3 text-yellow-400 mr-1" />
+                              {product.rating || '4.5'}
+                            </div>
+                          </div>
+                          <div className="flex items-center justify-between mt-2">
+                            <span className="text-xs text-green-600 flex items-center">
+                              <FiTruck className="w-3 h-3 mr-1" />
+                              {product.delivery || 'Standard delivery'}
                             </span>
+                            <button 
+                              className="text-xs px-3 py-1.5 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                            >
+                              Add to Cart
+                            </button>
                           </div>
-                          <div className="flex items-center text-xs text-gray-500">
-                            <FiStar className="w-3 h-3 text-yellow-400 mr-1" />
-                            {product.rating}
-                          </div>
-                        </div>
-                        <div className="flex items-center justify-between mt-2">
-                          <span className="text-xs text-green-600 flex items-center">
-                            <FiTruck className="w-3 h-3 mr-1" />
-                            {product.delivery}
-                          </span>
-                          <button 
-                            onClick={() => product.isNew && setCurrentOfferProduct(product)}
-                            className={`text-xs px-3 py-1.5 rounded transition-colors ${
-                              product.isNew
-                                ? 'bg-green-600 text-white hover:bg-green-700'
-                                : 'bg-blue-600 text-white hover:bg-blue-700'
-                            }`}
-                          >
-                            {product.isNew ? 'Special Offer' : 'Add to Cart'}
-                          </button>
                         </div>
                       </div>
+                    ))
+                  ) : (
+                    <div className="col-span-2 text-center py-8">
+                      <FiPackage className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+                      <p className="text-gray-500">No recommended products yet</p>
+                      <p className="text-sm text-gray-400 mt-1">Start ordering to get personalized recommendations</p>
                     </div>
-                  ))}
+                  )}
                 </div>
               </div>
 
@@ -450,57 +350,82 @@ const DashboardHome = () => {
               <div className="bg-white rounded-xl border border-gray-200 p-6">
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="text-lg font-semibold text-gray-900">Recent Orders</h2>
-                  <button className="text-sm text-blue-600 font-medium hover:text-blue-700 flex items-center">
+                  <button 
+                    onClick={() => window.location.href = '/customer-dashboard/orders'}
+                    className="text-sm text-blue-600 font-medium hover:text-blue-700 flex items-center"
+                  >
                     View all <FiArrowRight className="w-4 h-4 ml-1" />
                   </button>
                 </div>
                 <div className="space-y-4">
-                  {recentOrders.map((order) => {
-                    const StatusIcon = getStatusIcon(order.status);
-                    return (
-                      <div key={order.id} className="p-4 border border-gray-100 rounded-lg hover:border-blue-200 transition-colors">
-                        <div className="flex items-center justify-between mb-3">
-                          <div className="flex items-center space-x-3">
-                            <div className={`p-2 rounded-lg ${getStatusColor(order.status)}`}>
-                              <StatusIcon className="w-4 h-4" />
+                  {dashboardData.recentOrders.length > 0 ? (
+                    dashboardData.recentOrders.map((order) => {
+                      const StatusIcon = getStatusIcon(order.status);
+                      const progress = getOrderProgress(order.status);
+                      return (
+                        <div key={order.id} className="p-4 border border-gray-100 rounded-lg hover:border-blue-200 transition-colors">
+                          <div className="flex items-center justify-between mb-3">
+                            <div className="flex items-center space-x-3">
+                              <div className={`p-2 rounded-lg ${getStatusColor(order.status)}`}>
+                                <StatusIcon className="w-4 h-4" />
+                              </div>
+                              <div>
+                                <p className="text-sm font-medium text-gray-900">
+                                  {order.items && order.items.length > 0 
+                                    ? `${order.items[0].product}${order.items.length > 1 ? ` + ${order.items.length - 1} more` : ''}`
+                                    : 'Order items'
+                                  }
+                                </p>
+                                <p className="text-xs text-gray-500">
+                                  #{order.id} • {new Date(order.created_at).toLocaleDateString()}
+                                </p>
+                              </div>
                             </div>
-                            <div>
-                              <p className="text-sm font-medium text-gray-900">{order.product}</p>
-                              <p className="text-xs text-gray-500">{order.id} • {order.date}</p>
+                            <span className="text-sm font-semibold text-gray-900">
+                              {formatCurrency(order.total_amount)}
+                            </span>
+                          </div>
+                          
+                          {/* Progress Bar */}
+                          <div className="mb-2">
+                            <div className="flex justify-between text-xs text-gray-500 mb-1">
+                              <span>Order Progress</span>
+                              <span>{progress}%</span>
+                            </div>
+                            <div className="w-full bg-gray-200 rounded-full h-2">
+                              <div 
+                                className={`h-2 rounded-full ${
+                                  order.status === 'delivered' ? 'bg-green-500' :
+                                  order.status === 'shipped' ? 'bg-blue-500' : 
+                                  order.status === 'processing' ? 'bg-orange-500' : 'bg-yellow-500'
+                                }`}
+                                style={{ width: `${progress}%` }}
+                              ></div>
                             </div>
                           </div>
-                          <span className="text-sm font-semibold text-gray-900">{order.amount}</span>
-                        </div>
-                        
-                        {/* Progress Bar */}
-                        <div className="mb-2">
-                          <div className="flex justify-between text-xs text-gray-500 mb-1">
-                            <span>Order Progress</span>
-                            <span>{order.progress}%</span>
-                          </div>
-                          <div className="w-full bg-gray-200 rounded-full h-2">
-                            <div 
-                              className={`h-2 rounded-full ${
-                                order.status === 'delivered' ? 'bg-green-500' :
-                                order.status === 'shipped' ? 'bg-blue-500' : 'bg-orange-500'
-                              }`}
-                              style={{ width: `${order.progress}%` }}
-                            ></div>
+                          
+                          <div className="flex items-center justify-between text-xs">
+                            <span className="text-gray-600 flex items-center">
+                              <FiMapPin className="w-3 h-3 mr-1" />
+                              {getTrackingMessage(order.status)}
+                            </span>
+                            <button 
+                              onClick={() => window.location.href = `/customer-dashboard/orders/${order.id}`}
+                              className="text-blue-600 hover:text-blue-700 font-medium"
+                            >
+                              Track Details
+                            </button>
                           </div>
                         </div>
-                        
-                        <div className="flex items-center justify-between text-xs">
-                          <span className="text-gray-600 flex items-center">
-                            <FiMapPin className="w-3 h-3 mr-1" />
-                            {order.tracking}
-                          </span>
-                          <button className="text-blue-600 hover:text-blue-700 font-medium">
-                            Track Details
-                          </button>
-                        </div>
-                      </div>
-                    );
-                  })}
+                      );
+                    })
+                  ) : (
+                    <div className="text-center py-8">
+                      <FiShoppingCart className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+                      <p className="text-gray-500">No recent orders</p>
+                      <p className="text-sm text-gray-400 mt-1">Start shopping to see your orders here</p>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -514,26 +439,32 @@ const DashboardHome = () => {
                   <FiStar className="w-5 h-5 text-yellow-500" />
                 </div>
                 <div className="space-y-4">
-                  {currentOffers.map((offer, index) => (
-                    <div key={index} className="p-4 border border-gray-100 rounded-lg bg-gradient-to-r from-blue-50 to-indigo-50">
-                      <div className="flex items-start justify-between mb-2">
-                        <h3 className="font-medium text-gray-900">{offer.title}</h3>
-                        <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">
-                          {offer.code}
-                        </span>
+                  {dashboardData.currentOffers.length > 0 ? (
+                    dashboardData.currentOffers.map((offer, index) => (
+                      <div key={index} className="p-4 border border-gray-100 rounded-lg bg-gradient-to-r from-blue-50 to-indigo-50">
+                        <div className="flex items-start justify-between mb-2">
+                          <h3 className="font-medium text-gray-900">{offer.title}</h3>
+                          <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">
+                            {offer.code}
+                          </span>
+                        </div>
+                        <p className="text-sm text-gray-600 mb-3">{offer.description}</p>
+                        <div className="flex items-center justify-between text-xs text-gray-500">
+                          <span className="flex items-center">
+                            <FiCalendar className="w-3 h-3 mr-1" />
+                            Valid until {offer.validUntil}
+                          </span>
+                          <button className="text-blue-600 hover:text-blue-700 font-medium">
+                            Apply
+                          </button>
+                        </div>
                       </div>
-                      <p className="text-sm text-gray-600 mb-3">{offer.description}</p>
-                      <div className="flex items-center justify-between text-xs text-gray-500">
-                        <span className="flex items-center">
-                          <FiCalendar className="w-3 h-3 mr-1" />
-                          Valid until {offer.validUntil}
-                        </span>
-                        <button className="text-blue-600 hover:text-blue-700 font-medium">
-                          Apply
-                        </button>
-                      </div>
+                    ))
+                  ) : (
+                    <div className="text-center py-4">
+                      <p className="text-gray-500 text-sm">No current offers</p>
                     </div>
-                  ))}
+                  )}
                 </div>
               </div>
 
@@ -546,13 +477,12 @@ const DashboardHome = () => {
                   </div>
                 </div>
                 <div className="space-y-4">
-                  {newProductsWithOffers
-                    .filter(product => product.isNew)
-                    .map((product) => (
+                  {dashboardData.newArrivals.length > 0 ? (
+                    dashboardData.newArrivals.map((product) => (
                       <div key={product.id} className="p-4 border border-green-200 rounded-lg bg-green-50">
                         <div className="flex items-center space-x-3 mb-3">
                           <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center text-xl">
-                            {product.image}
+                            {product.image || '📦'}
                           </div>
                           <div className="flex-1">
                             <h3 className="font-medium text-gray-900 text-sm">{product.name}</h3>
@@ -564,16 +494,20 @@ const DashboardHome = () => {
                         </div>
                         <div className="flex items-center justify-between mb-2">
                           <div>
-                            <span className="text-lg font-bold text-green-600">{product.price}</span>
-                            <span className="text-sm text-gray-400 line-through ml-2">{product.originalPrice}</span>
+                            <span className="text-lg font-bold text-green-600">
+                              {formatCurrency(product.price)}
+                            </span>
+                            {product.originalPrice && (
+                              <span className="text-sm text-gray-400 line-through ml-2">
+                                {formatCurrency(product.originalPrice)}
+                              </span>
+                            )}
                           </div>
-                          <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">
-                            {product.discount}
-                          </span>
-                        </div>
-                        <div className="flex items-center justify-between text-xs text-gray-600 mb-3">
-                          <span>Offer ends in {product.daysRemaining} days</span>
-                          <span>After: {product.normalPrice}</span>
+                          {product.discount && (
+                            <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">
+                              {product.discount}
+                            </span>
+                          )}
                         </div>
                         <button
                           onClick={() => {
@@ -582,10 +516,15 @@ const DashboardHome = () => {
                           }}
                           className="w-full bg-green-600 text-white py-2 rounded-lg text-sm font-medium hover:bg-green-700 transition-colors"
                         >
-                          View Special Offer
+                          View Product
                         </button>
                       </div>
-                    ))}
+                    ))
+                  ) : (
+                    <div className="text-center py-4">
+                      <p className="text-gray-500 text-sm">No new arrivals</p>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -600,11 +539,17 @@ const DashboardHome = () => {
                     <FiMessageCircle className="w-6 h-6 text-blue-600 mb-2" />
                     <span className="text-sm font-medium text-gray-700">Chat Order</span>
                   </button>
-                  <button className="flex flex-col items-center p-3 border border-gray-200 rounded-lg hover:border-green-300 hover:bg-green-50 transition-colors">
+                  <button 
+                    onClick={() => window.location.href = '/products'}
+                    className="flex flex-col items-center p-3 border border-gray-200 rounded-lg hover:border-green-300 hover:bg-green-50 transition-colors"
+                  >
                     <FiPackage className="w-6 h-6 text-green-600 mb-2" />
                     <span className="text-sm font-medium text-gray-700">Browse</span>
                   </button>
-                  <button className="flex flex-col items-center p-3 border border-gray-200 rounded-lg hover:border-purple-300 hover:bg-purple-50 transition-colors">
+                  <button 
+                    onClick={() => window.location.href = '/customer-dashboard/orders'}
+                    className="flex flex-col items-center p-3 border border-gray-200 rounded-lg hover:border-purple-300 hover:bg-purple-50 transition-colors"
+                  >
                     <FiTruck className="w-6 h-6 text-purple-600 mb-2" />
                     <span className="text-sm font-medium text-gray-700">Track</span>
                   </button>
@@ -618,6 +563,24 @@ const DashboardHome = () => {
           </div>
         </div>
       </div>
+
+      {/* Chat Sidebar - Positioned absolutely over the content */}
+      <div className={`fixed top-0 right-0 h-full transition-transform duration-300 z-50 ${
+        showChat ? 'translate-x-0' : 'translate-x-full'
+      }`}>
+        <ChatSidebar 
+          show={showChat}
+          onClose={() => setShowChat(false)}
+        />
+      </div>
+
+      {/* Overlay when chat is open */}
+      {showChat && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+          onClick={() => setShowChat(false)}
+        />
+      )}
     </div>
   );
 };

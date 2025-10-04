@@ -42,6 +42,8 @@ def create_app():
     from app.routes.auth.login import login_bp
     from app.routes.products.product import products_bp  # Correct import path
     from app.routes.orders import orders_bp
+    from app.routes.orders.chatbot_orders import chatbot_bp
+    app.register_blueprint(chatbot_bp, url_prefix='/api')
     
     app.register_blueprint(orders_bp, url_prefix='/api')
     app.register_blueprint(register_bp, url_prefix='/api/auth')
