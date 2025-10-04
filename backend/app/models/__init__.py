@@ -1,4 +1,5 @@
-# File: backend/app/models/__init_.py
+# Import models separately to avoid circular imports
+from .User import User
 
-from .products import Product
-from .Order import Order
+# We'll configure relationships after all models are loaded
+__all__ = ['User']
