@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import{ FiBook } from 'react-icons/fi';
 
 const Register = () => {
   const navigate = useNavigate();
@@ -149,11 +150,11 @@ const Register = () => {
             {/* Animated Logo */}
             <div className="flex items-center gap-4 group cursor-pointer">
               <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-blue-700 flex items-center justify-center rounded-2xl shadow-lg transform group-hover:scale-105 transition-transform duration-300">
-                <span className="text-white font-bold text-xl">L</span>
+               <FiBook className="w-7 h-7 text-white" />
               </div>
               <div>
-                <h1 className="text-3xl font-bold text-gray-900">LedgerAI</h1>
-                <p className="text-blue-600/80 text-sm font-medium">Smart Business Solutions</p>
+                <h1 className="text-3xl font-bold text-gray-900"></h1>
+                
               </div>
             </div>
             
