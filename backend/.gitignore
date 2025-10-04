@@ -1,8 +1,8 @@
-instance/
+# Database files
 *.db
 *.sqlite
-__pycache__/
-*.pyc
-.env
-# Uploads
-app/static/uploads/
+*.sqlite3
+
+# Instance folder (Flask specific)
+instance/
+static

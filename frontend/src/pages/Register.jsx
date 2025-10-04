@@ -121,20 +121,20 @@ const Register = () => {
   const passwordStrength = getPasswordStrength(formData.password);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-white to-amber-50/30 flex items-center justify-center p-4 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50/30 flex items-center justify-center p-4 relative overflow-hidden">
       
       {/* Animated Background Elements */}
       <div className="absolute inset-0 overflow-hidden">
         {/* Floating animated shapes */}
-        <div className="absolute top-10 left-10 w-32 h-32 bg-amber-200/40 rounded-full blur-2xl animate-float"></div>
-        <div className="absolute bottom-20 right-20 w-48 h-48 bg-amber-300/30 rounded-full blur-2xl animate-float-delayed"></div>
-        <div className="absolute top-1/3 right-1/4 w-24 h-24 bg-amber-400/20 rounded-lg rotate-45 blur-xl animate-pulse"></div>
+        <div className="absolute top-10 left-10 w-32 h-32 bg-blue-200/40 rounded-full blur-2xl animate-float"></div>
+        <div className="absolute bottom-20 right-20 w-48 h-48 bg-blue-300/30 rounded-full blur-2xl animate-float-delayed"></div>
+        <div className="absolute top-1/3 right-1/4 w-24 h-24 bg-blue-400/20 rounded-lg rotate-45 blur-xl animate-pulse"></div>
         
         {/* Grid pattern */}
         <div className="absolute inset-0 opacity-[0.03]">
           <div className="absolute inset-0" style={{
-            backgroundImage: `linear-gradient(#92400e 1px, transparent 1px),
-                              linear-gradient(90deg, #92400e 1px, transparent 1px)`,
+            backgroundImage: `linear-gradient(#1e3a8a 1px, transparent 1px),
+                              linear-gradient(90deg, #1e3a8a 1px, transparent 1px)`,
             backgroundSize: '50px 50px'
           }} />
         </div>
@@ -148,69 +148,69 @@ const Register = () => {
           <div className="space-y-8">
             {/* Animated Logo */}
             <div className="flex items-center gap-4 group cursor-pointer">
-              <div className="w-16 h-16 bg-gradient-to-br from-amber-600 to-amber-700 flex items-center justify-center rounded-2xl shadow-lg transform group-hover:scale-105 transition-transform duration-300">
+              <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-blue-700 flex items-center justify-center rounded-2xl shadow-lg transform group-hover:scale-105 transition-transform duration-300">
                 <span className="text-white font-bold text-xl">L</span>
               </div>
               <div>
-                <h1 className="text-3xl font-bold text-gray-800">LedgerAI</h1>
-                <p className="text-amber-600/80 text-sm font-medium">Smart Business Solutions</p>
+                <h1 className="text-3xl font-bold text-gray-900">LedgerAI</h1>
+                <p className="text-blue-600/80 text-sm font-medium">Smart Business Solutions</p>
               </div>
             </div>
             
             {/* Main Headline with Animation */}
             <div className="space-y-6">
-              <h1 className="text-5xl lg:text-6xl font-bold text-gray-800 leading-tight">
+              <h1 className="text-5xl lg:text-6xl font-bold text-gray-900 leading-tight">
                 Start Your
                 <br />
                 <span className="relative">
-                  <span className="bg-gradient-to-r from-amber-600 to-amber-700 bg-clip-text text-transparent">
+                  <span className="bg-gradient-to-r from-blue-600 to-blue-700 bg-clip-text text-transparent">
                     Business Journey
                   </span>
-                  <div className="absolute bottom-2 left-0 w-full h-1 bg-gradient-to-r from-amber-600 to-amber-700 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500"></div>
+                  <div className="absolute bottom-2 left-0 w-full h-1 bg-gradient-to-r from-blue-600 to-blue-700 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500"></div>
                 </span>
               </h1>
               
-              <p className="text-xl text-gray-600 leading-relaxed max-w-2xl">
+              <p className="text-xl text-gray-700 leading-relaxed max-w-2xl">
                 Join thousands of businesses already managing their inventory and finances smarter with our AI-powered platform.
               </p>
             </div>
 
             {/* Interactive Features Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-8">
-              <div className="group p-6 bg-white/70 rounded-2xl border border-amber-100 backdrop-blur-sm hover:shadow-lg transition-all duration-300 hover:border-amber-300">
-                <div className="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center mb-4 group-hover:bg-amber-200 transition-colors">
-                  <svg className="w-6 h-6 text-amber-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="group p-6 bg-white/70 rounded-2xl border border-blue-100 backdrop-blur-sm hover:shadow-lg transition-all duration-300 hover:border-blue-300">
+                <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mb-4 group-hover:bg-blue-200 transition-colors">
+                  <svg className="w-6 h-6 text-blue-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                   </svg>
                 </div>
-                <h3 className="text-lg font-semibold text-gray-800 mb-2">Bank-Level Security</h3>
-                <p className="text-gray-600 text-sm">Your data is encrypted and protected with enterprise-grade security</p>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">Bank-Level Security</h3>
+                <p className="text-gray-700 text-sm">Your data is encrypted and protected with enterprise-grade security</p>
               </div>
               
-              <div className="group p-6 bg-white/70 rounded-2xl border border-amber-100 backdrop-blur-sm hover:shadow-lg transition-all duration-300 hover:border-amber-300">
-                <div className="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center mb-4 group-hover:bg-amber-200 transition-colors">
-                  <svg className="w-6 h-6 text-amber-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="group p-6 bg-white/70 rounded-2xl border border-blue-100 backdrop-blur-sm hover:shadow-lg transition-all duration-300 hover:border-blue-300">
+                <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mb-4 group-hover:bg-blue-200 transition-colors">
+                  <svg className="w-6 h-6 text-blue-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                   </svg>
                 </div>
-                <h3 className="text-lg font-semibold text-gray-800 mb-2">Lightning Fast</h3>
-                <p className="text-gray-600 text-sm">Real-time updates and instant insights for quick decision making</p>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">Lightning Fast</h3>
+                <p className="text-gray-700 text-sm">Real-time updates and instant insights for quick decision making</p>
               </div>
             </div>
 
             {/* Stats */}
             <div className="flex items-center gap-8 pt-8">
               <div className="text-center">
-                <div className="text-2xl font-bold text-amber-700">10K+</div>
-                <div className="text-sm text-gray-600">Active Businesses</div>
+                <div className="text-2xl font-bold text-blue-700">10K+</div>
+                <div className="text-sm text-gray-700">Active Businesses</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-amber-700">99.9%</div>
-                <div className="text-sm text-gray-600">Uptime</div>
+                <div className="text-2xl font-bold text-blue-700">99.9%</div>
+                <div className="text-sm text-gray-700">Uptime</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-amber-700">24/7</div>
-                <div className="text-sm text-gray-600">Support</div>
+                <div className="text-2xl font-bold text-blue-700">24/7</div>
+                <div className="text-sm text-gray-700">Support</div>
               </div>
             </div>
           </div>
@@ -218,17 +218,17 @@ const Register = () => {
 
         {/* Right Section - Interactive Registration Form */}
         <div className="flex items-center justify-center p-6 lg:p-8">
-          <div className="w-full max-w-md bg-white/80 backdrop-blur-sm rounded-3xl p-8 shadow-2xl border border-amber-100 hover:shadow-amber-100/20 transition-all duration-500">
+          <div className="w-full max-w-md bg-white/80 backdrop-blur-sm rounded-3xl p-8 shadow-2xl border border-blue-100 hover:shadow-blue-100/20 transition-all duration-500">
             
             {/* Form Header with Icon */}
             <div className="text-center mb-8">
-              <div className="w-16 h-16 bg-gradient-to-br from-amber-600 to-amber-700 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+              <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-blue-700 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
                 <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
                 </svg>
               </div>
-              <h2 className="text-3xl font-bold text-gray-800 mb-2">Join Us Today</h2>
-              <p className="text-gray-600">Create your account in seconds</p>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">Join Us Today</h2>
+              <p className="text-gray-700">Create your account in seconds</p>
             </div>
 
             {/* Messages */}
@@ -258,7 +258,7 @@ const Register = () => {
             <form className="space-y-6" onSubmit={handleSubmit}>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <label htmlFor="firstName" className="block text-sm font-medium text-gray-700">
+                  <label htmlFor="firstName" className="block text-sm font-medium text-gray-900">
                     First Name
                   </label>
                   <input
@@ -269,12 +269,12 @@ const Register = () => {
                     onChange={handleChange}
                     onFocus={() => setActiveField('firstName')}
                     onBlur={() => setActiveField('')}
-                    className={`w-full px-4 py-3 bg-white text-gray-800 placeholder-gray-400 focus:outline-none border-2 rounded-xl transition-all duration-300 ${
+                    className={`w-full px-4 py-3 bg-white text-gray-900 placeholder-gray-500 focus:outline-none border-2 rounded-xl transition-all duration-300 ${
                       errors.firstName 
                         ? 'border-red-500 shadow-lg shadow-red-500/20' 
                         : activeField === 'firstName'
-                        ? 'border-amber-600 shadow-lg shadow-amber-600/20'
-                        : 'border-gray-200 hover:border-amber-400'
+                        ? 'border-blue-600 shadow-lg shadow-blue-600/20'
+                        : 'border-gray-300 hover:border-blue-400'
                     }`}
                     placeholder="John"
                   />
@@ -289,7 +289,7 @@ const Register = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <label htmlFor="lastName" className="block text-sm font-medium text-gray-700">
+                  <label htmlFor="lastName" className="block text-sm font-medium text-gray-900">
                     Last Name
                   </label>
                   <input
@@ -300,12 +300,12 @@ const Register = () => {
                     onChange={handleChange}
                     onFocus={() => setActiveField('lastName')}
                     onBlur={() => setActiveField('')}
-                    className={`w-full px-4 py-3 bg-white text-gray-800 placeholder-gray-400 focus:outline-none border-2 rounded-xl transition-all duration-300 ${
+                    className={`w-full px-4 py-3 bg-white text-gray-900 placeholder-gray-500 focus:outline-none border-2 rounded-xl transition-all duration-300 ${
                       errors.lastName 
                         ? 'border-red-500 shadow-lg shadow-red-500/20' 
                         : activeField === 'lastName'
-                        ? 'border-amber-600 shadow-lg shadow-amber-600/20'
-                        : 'border-gray-200 hover:border-amber-400'
+                        ? 'border-blue-600 shadow-lg shadow-blue-600/20'
+                        : 'border-gray-300 hover:border-blue-400'
                     }`}
                     placeholder="Doe"
                   />
@@ -321,7 +321,7 @@ const Register = () => {
               </div>
 
               <div className="space-y-2">
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                <label htmlFor="email" className="block text-sm font-medium text-gray-900">
                   Email Address
                 </label>
                 <input
@@ -332,12 +332,12 @@ const Register = () => {
                   onChange={handleChange}
                   onFocus={() => setActiveField('email')}
                   onBlur={() => setActiveField('')}
-                  className={`w-full px-4 py-3 bg-white text-gray-800 placeholder-gray-400 focus:outline-none border-2 rounded-xl transition-all duration-300 ${
+                  className={`w-full px-4 py-3 bg-white text-gray-900 placeholder-gray-500 focus:outline-none border-2 rounded-xl transition-all duration-300 ${
                     errors.email 
                       ? 'border-red-500 shadow-lg shadow-red-500/20' 
                       : activeField === 'email'
-                      ? 'border-amber-600 shadow-lg shadow-amber-600/20'
-                      : 'border-gray-200 hover:border-amber-400'
+                      ? 'border-blue-600 shadow-lg shadow-blue-600/20'
+                      : 'border-gray-300 hover:border-blue-400'
                   }`}
                   placeholder="john@company.com"
                 />
@@ -352,7 +352,7 @@ const Register = () => {
               </div>
 
               <div className="space-y-2">
-                <label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-700">
+                <label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-900">
                   Phone Number
                 </label>
                 <input
@@ -363,12 +363,12 @@ const Register = () => {
                   onChange={handleChange}
                   onFocus={() => setActiveField('phoneNumber')}
                   onBlur={() => setActiveField('')}
-                  className={`w-full px-4 py-3 bg-white text-gray-800 placeholder-gray-400 focus:outline-none border-2 rounded-xl transition-all duration-300 ${
+                  className={`w-full px-4 py-3 bg-white text-gray-900 placeholder-gray-500 focus:outline-none border-2 rounded-xl transition-all duration-300 ${
                     errors.phoneNumber 
                       ? 'border-red-500 shadow-lg shadow-red-500/20' 
                       : activeField === 'phoneNumber'
-                      ? 'border-amber-600 shadow-lg shadow-amber-600/20'
-                      : 'border-gray-200 hover:border-amber-400'
+                      ? 'border-blue-600 shadow-lg shadow-blue-600/20'
+                      : 'border-gray-300 hover:border-blue-400'
                   }`}
                   placeholder="+1 (555) 123-4567"
                 />
@@ -384,7 +384,7 @@ const Register = () => {
 
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                  <label htmlFor="password" className="block text-sm font-medium text-gray-900">
                     Password
                   </label>
                   <input
@@ -395,12 +395,12 @@ const Register = () => {
                     onChange={handleChange}
                     onFocus={() => setActiveField('password')}
                     onBlur={() => setActiveField('')}
-                    className={`w-full px-4 py-3 bg-white text-gray-800 placeholder-gray-400 focus:outline-none border-2 rounded-xl transition-all duration-300 ${
+                    className={`w-full px-4 py-3 bg-white text-gray-900 placeholder-gray-500 focus:outline-none border-2 rounded-xl transition-all duration-300 ${
                       errors.password 
                         ? 'border-red-500 shadow-lg shadow-red-500/20' 
                         : activeField === 'password'
-                        ? 'border-amber-600 shadow-lg shadow-amber-600/20'
-                        : 'border-gray-200 hover:border-amber-400'
+                        ? 'border-blue-600 shadow-lg shadow-blue-600/20'
+                        : 'border-gray-300 hover:border-blue-400'
                     }`}
                     placeholder="Create a strong password"
                   />
@@ -408,20 +408,20 @@ const Register = () => {
                   {/* Password Strength Indicator */}
                   {formData.password && (
                     <div className="space-y-2">
-                      <div className="flex justify-between text-xs text-gray-500">
+                      <div className="flex justify-between text-xs text-gray-600">
                         <span>Password strength</span>
                         <span className={`font-medium ${
                           passwordStrength < 50 ? 'text-red-500' :
-                          passwordStrength < 75 ? 'text-amber-500' : 'text-green-500'
+                          passwordStrength < 75 ? 'text-yellow-500' : 'text-green-500'
                         }`}>
                           {passwordStrength < 50 ? 'Weak' : passwordStrength < 75 ? 'Good' : 'Strong'}
                         </span>
                       </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div className="w-full bg-gray-300 rounded-full h-2">
                         <div 
                           className={`h-2 rounded-full transition-all duration-500 ${
                             passwordStrength < 50 ? 'bg-red-500' :
-                            passwordStrength < 75 ? 'bg-amber-500' : 'bg-green-500'
+                            passwordStrength < 75 ? 'bg-yellow-500' : 'bg-green-500'
                           }`}
                           style={{ width: `${passwordStrength}%` }}
                         ></div>
@@ -440,7 +440,7 @@ const Register = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
+                  <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-900">
                     Confirm Password
                   </label>
                   <input
@@ -451,12 +451,12 @@ const Register = () => {
                     onChange={handleChange}
                     onFocus={() => setActiveField('confirmPassword')}
                     onBlur={() => setActiveField('')}
-                    className={`w-full px-4 py-3 bg-white text-gray-800 placeholder-gray-400 focus:outline-none border-2 rounded-xl transition-all duration-300 ${
+                    className={`w-full px-4 py-3 bg-white text-gray-900 placeholder-gray-500 focus:outline-none border-2 rounded-xl transition-all duration-300 ${
                       errors.confirmPassword 
                         ? 'border-red-500 shadow-lg shadow-red-500/20' 
                         : activeField === 'confirmPassword'
-                        ? 'border-amber-600 shadow-lg shadow-amber-600/20'
-                        : 'border-gray-200 hover:border-amber-400'
+                        ? 'border-blue-600 shadow-lg shadow-blue-600/20'
+                        : 'border-gray-300 hover:border-blue-400'
                     }`}
                     placeholder="Confirm your password"
                   />
@@ -476,7 +476,7 @@ const Register = () => {
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full group relative py-4 bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white font-semibold rounded-xl transition-all duration-300 transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl shadow-amber-600/25 hover:shadow-amber-700/30"
+                  className="w-full group relative py-4 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold rounded-xl transition-all duration-300 transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl shadow-blue-600/25 hover:shadow-blue-700/30"
                 >
                   {isLoading ? (
                     <div className="flex items-center justify-center gap-3">
@@ -495,12 +495,12 @@ const Register = () => {
               </div>
 
               {/* Login Link */}
-              <div className="text-center pt-6 border-t border-gray-200">
-                <p className="text-gray-600">
+              <div className="text-center pt-6 border-t border-gray-300">
+                <p className="text-gray-700">
                   Already have an account?{' '}
                   <Link
                     to="/login"
-                    className="font-semibold text-amber-700 hover:text-amber-800 transition-colors duration-200"
+                    className="font-semibold text-blue-700 hover:text-blue-800 transition-colors duration-200"
                   >
                     Sign in here
                   </Link>
