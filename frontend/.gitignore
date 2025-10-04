@@ -30,3 +30,4 @@ dist-ssr
 
 # Instance folder (Flask specific)
 instance/
+static/
